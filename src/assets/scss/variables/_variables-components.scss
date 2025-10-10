@@ -1,0 +1,42 @@
+//  ================================================================================================
+//  ? TIP:  It is recommended to use this file for overriding component variables.
+//  ================================================================================================
+
+$font-family-sans-serif: "Estedad", sans-serif;
+
+:root {
+  --bs-primary: #133D70;
+  --bs-primary-rgb: 19, 61, 112;
+  --bs-card-color: #dadbe5 !important;
+  --bs-list-group-active-bg: #161d31 !important;
+  --bs-list-group-active-border-color: #161d31 !important;
+  --bs-modal-bg: #133D70 !important;
+  --bs-link-color: #133D70 !important;
+  --bs-link-hover-color: #133D70 !important;
+  --bs-dropdown-link-hover-bg: #133D70 !important;
+}
+
+.dropdown-menu {
+  --bs-dropdown-link-hover-color: #000 !important;
+  --bs-dropdown-link-hover-bg: rgba(0,0,0,0.1) !important;
+  --bs-dropdown-link-active-bg: rgba(0,0,0,0.1) !important;
+}
+
+.card {
+  --bs-card-bg: #fff !important;
+  --bs-card-border-color: #fff !important;
+  --bs-card-border-width: 0px !important;
+  --bs-card-border-radius: 0px !important;
+}
+
+.navbar-nav {
+  --bs-nav-link-color: #fff !important;
+  --bs-nav-link-hover-color: var(--bs-navbar-hover-color);
+  --bs-nav-link-disabled-color: var(--bs-navbar-disabled-color);
+}
+
+.list-group-item.active {
+  color: #000;
+  border-color: transparent !important;
+}
+

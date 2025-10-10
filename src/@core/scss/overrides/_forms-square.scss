@@ -1,0 +1,33 @@
+/* =============================================================================
+   Square edges for form controls & containers (non-invasive override)
+   اثر فقط روی فرم‌ها و ظرف/کارت‌ها؛ دکمه‌ها و سایر مؤلفه‌ها تغییر نمی‌کنند.
+   ============================================================================ */
+
+/* فرم‌ها: اینپوت‌ها، تکست‌اریا، سلکت‌ها، ادیتورهای رایج */
+.form-control,
+.form-control:focus,
+textarea.form-control,
+input.form-control,
+select.form-select,
+.form-select,
+.input-group .form-control,
+.input-group-text,
+.react-select__control,
+.MuiOutlinedInput-root {
+  border-radius: 0 !important;
+}
+
+/* چک‌باکس/رادیو و فایل‌اینپوت */
+.form-check-input,
+.form-file-input {
+  border-radius: 0 !important;
+}
+
+/* ظرف‌ها/قالب‌ها که فرم داخلشان است */
+.card,
+.modal-content,
+.dropdown-menu,
+.list-group,
+.list-group-item {
+  border-radius: 0 !important;
+}

@@ -1,0 +1,80 @@
+@import './base/bootstrap.scss';
+@import './base/bootstrap-extended.scss';
+@import './base/colors.scss';
+@import './base/components.scss';
+
+// Themes
+@import './base/themes/dark-layout.scss';
+@import './base/themes/bordered-layout.scss';
+@import './base/themes/semi-dark-layout.scss';
+// @import './base/custom-rtl.scss';
+
+// React Specific
+@import 'react/index';
+
+/* =============================================================================
+   Project overrides — Option B: Pastel accents for dashboard tiles
+   هدف: کاشی‌های داشبورد (Cardهایی که فقط آیکون + عنوان دارند) رنگ ملایم بگیرند،
+   مرز (border) همرنگ برند داشته باشند، هاور خوانا و واضح شود،
+   بدون تغییر منطق/مارکاپ و بدون رنگی کردنِ کل سیستم.
+   ============================================================================ */
+
+/* رنگ برند به صورت RGB برای ساخت tint های ملایم */
+:root {
+  --tile-accent-rgb: 19, 61, 112; /* #133D70 */
+}
+
+/* کاشی‌های داشبورد: با تکیه بر کلاس‌های موجود در JSX
+   (d-flex + align-items-center + justify-content-center + pt-1 + pb-1) */
+.card.d-flex.justify-content-center.align-items-center.pt-1.pb-1 {
+  /* پس‌زمینهٔ پَستِل از رنگ برند */
+  background-color: rgba(var(--tile-accent-rgb), 0.06) !important;
+
+  /* مرز ملایم هم‌خانواده برند */
+  border: 1px solid rgba(var(--tile-accent-rgb), 0.12) !important;
+
+  /* سایه‌ی نرم برای برجسته شدن */
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06) !important;
+
+  /* لبه‌ها کاملاً صاف (هماهنگ با درخواست قبلی) */
+  border-radius: 0 !important;
+
+  /* ترنزیشن لطیف برای هاور/فوکِس */
+  transition: background-color .2s ease, border-color .2s ease, box-shadow .2s ease, transform .15s ease;
+}
+
+/* رنگ تیتر و آیکون‌ها همرنگ برند شود */
+.card.d-flex.justify-content-center.align-items-center.pt-1.pb-1 .fw-bold {
+  color: rgb(var(--tile-accent-rgb)) !important;
+}
+.card.d-flex.justify-content-center.align-items-center.pt-1.pb-1 svg {
+  stroke: rgb(var(--tile-accent-rgb)) !important;
+  fill: none;
+}
+
+/* هاور و فوکِس: کمی پررنگ‌تر و واضح‌تر */
+.card.d-flex.justify-content-center.align-items-center.pt-1.pb-1:hover,
+.card.d-flex.justify-content-center.align-items-center.pt-1.pb-1:focus,
+.card.d-flex.justify-content-center.align-items-center.pt-1.pb-1:focus-within {
+  background-color: rgba(var(--tile-accent-rgb), 0.12) !important;
+  border-color: rgba(var(--tile-accent-rgb), 0.28) !important;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08) !important;
+  transform: translateY(-1px);
+  outline: 2px solid rgba(var(--tile-accent-rgb), 0.25);
+  outline-offset: 2px;
+}
+
+/* وضعیت Active با کیبورد/تاچ */
+.card.d-flex.justify-content-center.align-items-center.pt-1.pb-1:active {
+  transform: translateY(0);
+  background-color: rgba(var(--tile-accent-rgb), 0.16) !important;
+  border-color: rgba(var(--tile-accent-rgb), 0.34) !important;
+}
+
+/* نسخهٔ موبایل: فاصله و لمس‌پذیری بهتر */
+@media (max-width: 576px) {
+  .card.d-flex.justify-content-center.align-items-center.pt-1.pb-1 {
+    padding-top: .85rem !important;
+    padding-bottom: .85rem !important;
+  }
+}

@@ -1,0 +1,130 @@
+import { Controller, useForm } from "react-hook-form";
+import {
+  Button,
+  Form,
+  FormGroup,
+  Input,
+  Label,
+  Modal,
+  ModalBody,
+  ModalHeader,
+} from "reactstrap";
+
+import axios from "axios";
+import toast from "react-hot-toast";
+
+const AddBuildingManagerModal = ({ show, toggle, refreshData, setLoading }) => {
+  const {
+    control,
+    register,
+    reset,
+    handleSubmit,
+    formState: { errors },
+  } = useForm();
+
+  const onSubmit = async (data) => {
+    setLoading(true);
+    try {
+      const response = await axios.post("building_manager/buildingManagers", data);
+      toast.success(response.data.message);
+      reset();
+      refreshData();
+      toggle();
+    } catch (err) {
+      if (err.response && err.response.data.message) {
+        toast.error(err.response.data.message);
+      } else {
+        console.log(err);
+      }
+    }
+    setLoading(false);
+  };
+
+  return (
+    <Modal isOpen={show} centered={true} size="lg" toggle={toggle}>
+      <ModalHeader toggle={toggle}>افزودن مدیر جدید</ModalHeader>
+      <ModalBody>
+        <Form onSubmit={handleSubmit(onSubmit)}>
+          <FormGroup>
+            <Controller
+              name="first_name"
+              control={control}
+              defaultValue=""
+              rules={{ required: true }}
+              render={({ field }) => (
+                <Input {...field} type="text" placeholder="نام" />
+              )}
+            />
+            {errors.first_name && <div className="text-danger">نام را وارد کنید</div>}
+          </FormGroup>
+          <FormGroup>
+            <Controller
+              name="last_name"
+              control={control}
+              defaultValue=""
+              rules={{ required: true }}
+              render={({ field }) => (
+                <Input {...field} type="text" placeholder="نام خانوادگی" />
+              )}
+            />
+            {errors.last_name && (
+              <div className="text-danger">نام خانوادگی را وارد کنید</div>
+            )}
+          </FormGroup>
+          <FormGroup>
+            <Controller
+              name="mobile"
+              control={control}
+              defaultValue=""
+              rules={{ required: true }}
+              render={({ field }) => (
+                <Input {...field} type="text" placeholder="موبایل" />
+              )}
+            />
+            {errors.mobile && (
+              <div className="text-danger">موبایل را وارد کنید</div>
+            )}
+          </FormGroup>
+          <FormGroup>
+            <Label>دسترسی</Label>
+            <Controller
+              name="type"
+              control={control}
+              defaultValue="main"
+              rules={{ required: true }}
+              render={({ field }) => (
+                <select
+                  className="form-control"
+                  {...field}
+                >
+                  {/* <option value='main'>دسترسی کامل</option> */}
+                  <option value='hsh-1'>حسابداری</option>
+                  <option value='other'>فقط مشاهده</option>
+                </select>
+              )}
+            />
+            {errors.category && (
+              <div className="text-danger">دسته بندی را وارد کنید</div>
+            )}
+            {/* <div className="text-muted">دسترسی کامل: دسترسی به تمامی بخش ها</div> */}
+            <div className="text-muted">حسابداری: دسترسی به بخش های مربوط به حسابداری و گزارش ها</div>
+            <div className="text-muted">فقط مشاهده: دسترسی فقط به مشاهده کلیه قسمت ها</div>
+          </FormGroup>
+          <div className="mt-3 d-flex justify-content-center w-100">
+            <Button
+              color="primary"
+              type="submit"
+              style={{
+                minWidth: "150px",
+              }}
+            >
+              ثبت
+            </Button>
+          </div>
+        </Form>
+      </ModalBody>
+    </Modal>
+  );
+};
+
+export default AddBuildingManagerModal;

@@ -1,0 +1,39 @@
+//  ================================================================================================
+//  ? TIP:  It is recommended to use this file for overriding bootstrap variables.
+//  ================================================================================================
+
+$font-family-sans-serif: "Estedad", sans-serif;
+
+:root {
+  --bs-primary: #133D70;
+  --bs-primary-rgb: 19, 61, 112;
+  --bs-link-color: #133D70;
+  --bs-card-bg: #dadbe5;
+  // --bs-list-group-active-bg: #161d31 !important;
+  // --bs-list-group-active-border-color: #161d31 !important;
+  --bs-modal-bg: #133D70 !important;
+
+  // --bs-link-color: #3d417b;
+  // --bs-link-hover-color: #3d417b;
+  --bs-secondary-rgb: 255, 199, 39 !important;
+}
+
+/* ===========================
+   مربع‌کردن لبهٔ فرم‌ها و قالب‌ها (فقط فرم‌ها و کارت‌ها)
+   این متغیرها پیش از متغیرهای بوت‌استرپ/تم لود می‌شوند و
+   به‌خاطر !default در فایل‌های بعدی، همین مقادیر اعمال خواهد شد.
+   =========================== */
+
+/* فرم‌ها: input / textarea / select */
+$input-border-radius: 0 !default;
+$input-border-radius-lg: 0 !default;
+$input-border-radius-sm: 0 !default;
+$form-select-border-radius: 0 !default;
+
+/* چک‌باکس/رادیو (برای اطمینان از چهارگوش بودن در برخی اسکین‌ها) */
+$form-check-input-border-radius: 0 !default;
+
+/* قالب‌ها/کارت‌ها که فرم داخلشان قرار می‌گیرد */
+$card-border-radius: 0 !default;
+
+/* توجه: عمداً radius دکمه‌ها را تغییر ندادیم تا فقط فرم‌ها و کارت‌ها مربع شوند. */

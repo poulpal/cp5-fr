@@ -1,0 +1,299 @@
+body {
+  background: #fff !important;
+}
+
+@font-face {
+  font-family: IRANSans;
+  font-style: normal;
+  font-weight: bold;
+  src: url("../fonts/eot/IRANSansWeb(FaNum)_Bold.eot");
+  src: url("../fonts/eot/IRANSansWeb(FaNum)_Bold.eot?#iefix")
+      format("embedded-opentype"),
+    /* IE6-8 */ url("../fonts/woff2/IRANSansWeb(FaNum)_Bold.woff2")
+      format("woff2"),
+    /* FF39+,Chrome36+, Opera24+*/
+      url("../fonts/woff/IRANSansWeb(FaNum)_Bold.woff") format("woff"),
+    /* FF3.6+, IE9, Chrome6+, Saf5.1+*/
+      url("../fonts/ttf/IRANSansWeb(FaNum)_Bold.ttf") format("truetype");
+}
+@font-face {
+  font-family: IRANSans;
+  font-style: normal;
+  font-weight: 500;
+  src: url("../fonts/eot/IRANSansWeb(FaNum)_Medium.eot");
+  src: url("../fonts/eot/IRANSansWeb(FaNum)_Medium.eot?#iefix")
+      format("embedded-opentype"),
+    /* IE6-8 */ url("../fonts/woff2/IRANSansWeb(FaNum)_Medium.woff2")
+      format("woff2"),
+    /* FF39+,Chrome36+, Opera24+*/
+      url("../fonts/woff/IRANSansWeb(FaNum)_Medium.woff") format("woff"),
+    /* FF3.6+, IE9, Chrome6+, Saf5.1+*/
+      url("../fonts/ttf/IRANSansWeb(FaNum)_Medium.ttf") format("truetype");
+}
+@font-face {
+  font-family: IRANSans;
+  font-style: normal;
+  font-weight: 300;
+  src: url("../fonts/eot/IRANSansWeb(FaNum)_Light.eot");
+  src: url("../fonts/eot/IRANSansWeb(FaNum)_Light.eot?#iefix")
+      format("embedded-opentype"),
+    /* IE6-8 */ url("../fonts/woff2/IRANSansWeb(FaNum)_Light.woff2")
+      format("woff2"),
+    /* FF39+,Chrome36+, Opera24+*/
+      url("../fonts/woff/IRANSansWeb(FaNum)_Light.woff") format("woff"),
+    /* FF3.6+, IE9, Chrome6+, Saf5.1+*/
+      url("../fonts/ttf/IRANSansWeb(FaNum)_Light.ttf") format("truetype");
+}
+@font-face {
+  font-family: IRANSans;
+  font-style: normal;
+  font-weight: 200;
+  src: url("../fonts/eot/IRANSansWeb(FaNum)_UltraLight.eot");
+  src: url("../fonts/eot/IRANSansWeb(FaNum)_UltraLight.eot?#iefix")
+      format("embedded-opentype"),
+    /* IE6-8 */ url("../fonts/woff2/IRANSansWeb(FaNum)_UltraLight.woff2")
+      format("woff2"),
+    /* FF39+,Chrome36+, Opera24+*/
+      url("../fonts/woff/IRANSansWeb(FaNum)_UltraLight.woff") format("woff"),
+    /* FF3.6+, IE9, Chrome6+, Saf5.1+*/
+      url("../fonts/ttf/IRANSansWeb(FaNum)_UltraLight.ttf") format("truetype");
+}
+@font-face {
+  font-family: IRANSans;
+  font-style: normal;
+  font-weight: normal;
+  src: url("../fonts/eot/IRANSansWeb(FaNum).eot");
+  src: url("../fonts/eot/IRANSansWeb(FaNum).eot?#iefix")
+      format("embedded-opentype"),
+    /* IE6-8 */ url("../fonts/woff2/IRANSansWeb(FaNum).woff2") format("woff2"),
+    /* FF39+,Chrome36+, Opera24+*/ url("../fonts/woff/IRANSansWeb(FaNum).woff")
+      format("woff"),
+    /* FF3.6+, IE9, Chrome6+, Saf5.1+*/
+      url("../fonts/ttf/IRANSansWeb(FaNum).ttf") format("truetype");
+}
+
+* {
+  font-family: IRANSans, sans-serif;
+}
+
+.blank-page {
+  background: #fff !important;
+}
+
+.survey {
+  min-height: calc(100vh - 68px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  .survey-card {
+    border-radius: 56px !important;
+    background: #f3f1f1;
+    box-shadow: 0px 4px 12px 0px rgba(0, 0, 0, 0.2);
+    width: 100%;
+    max-width: 710px;
+    padding-top: 5%;
+    padding-bottom: 4%;
+    min-height: 85vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    padding-right: 50px;
+    padding-left: 50px;
+    margin-bottom: 0 !important;
+    @media (max-width: 768px) {
+      padding-right: 20px;
+      padding-left: 20px;
+      background: #fff;
+      box-shadow: unset;
+    }
+  }
+  .logo {
+    margin-bottom: 20px;
+    width: 134px;
+    height: 134px;
+  }
+  .end-logo {
+    margin-bottom: 20px;
+    width: 264px;
+    height: 264px;
+  }
+  .title {
+    color: var(--bs-primary);
+    text-align: center;
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 800;
+    line-height: 107.143%; /* 23.571px */
+    margin-bottom: 30px;
+  }
+  .description {
+    color: #464646;
+    text-align: justify;
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 140%; /* 33.6px */
+    margin-bottom: 20px;
+  }
+
+  .eta-box {
+    background: rgba(140, 140, 140, 0.2);
+    height: 47px;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #464646;
+    text-align: center;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 800;
+    line-height: 0%; /* 0px */
+    margin-bottom: 28px;
+    @media (max-width: 768px) {
+      margin-right: -20px;
+      margin-left: -20px;
+      width: 100vw;
+    }
+  }
+
+  .button {
+    border-radius: 5px;
+    background: var(--bs-primary);
+    min-width: 224px;
+    height: 47px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #fff;
+    text-align: center;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 107.143%; /* 19.286px */
+    cursor: pointer;
+    &.left {
+      span {
+        margin-left: 10px;
+      }
+    }
+    &.right {
+      span {
+        margin-right: 10px;
+      }
+    }
+    &.progress-button {
+      height: 40px;
+      min-width: unset;
+      width: 150px;
+      color: #fff;
+      text-align: center;
+      font-size: 14px;
+      font-style: normal;
+      font-weight: 700;
+      line-height: 107.143%; /* 19.286px */
+      &.disabled {
+        background: #9d9d9d;
+        cursor: not-allowed;
+      }
+    }
+  }
+
+  .question {
+    width: 100%;
+    .title {
+      color: #464646;
+      text-align: justify;
+      font-size: 18px;
+      font-style: normal;
+      font-weight: 700;
+      line-height: 140%; /* 36.4px */
+      margin-bottom: 18px;
+      width: 100%;
+    }
+    .options {
+      .option {
+        cursor: pointer;
+        .option-title {
+          color: #464646;
+          text-align: left;
+          margin-left: 8px;
+          font-size: 16px;
+          font-style: normal;
+          font-weight: 500;
+          line-height: 140%; /* 36.4px */
+        }
+        margin-bottom: 9px;
+        border-radius: 5px;
+        border: 0.25px solid #9d9d9d;
+        background: rgba(224, 224, 224, 0.6);
+        min-width: 225px;
+        width: 285px;
+        height: 48px;
+        color: #464646;
+        text-align: justify;
+        font-size: 20px;
+        font-style: normal;
+        font-weight: 500;
+        line-height: 140%; /* 36.4px */
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+        padding: 7px;
+        &.selected {
+          border: 3px solid var(--bs-primary);
+          .option-title {
+            color: var(--bs-primary);
+          }
+          .number {
+            background: var(--bs-primary);
+          }
+        }
+      }
+      .number {
+        width: 36px;
+        height: 36px;
+        border-radius: 3px;
+        background: #333;
+        color: #fff;
+        text-align: justify;
+        font-family: IRANYekanMsn;
+        font-size: 14px;
+        font-style: normal;
+        font-weight: 700;
+        line-height: 140%; /* 19.6px */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+    }
+
+    .input-error {
+      font-size: 12px;
+      color: #ffffff;
+      border-radius: 4px;
+      background: #c60000;
+      margin-top: 4px;
+      padding: 2px 7px;
+      width: fit-content;
+    }
+
+    .survey-input {
+      border-radius: 5px;
+      border: 3px solid #efeded;
+      background: rgba(224, 224, 224, 0.6);
+      width: 345px;
+      height: 48px;
+      padding-left: 15px;
+      &:focus {
+        border: 3px solid var(--bs-primary);
+      }
+
+      &.hasError {
+        border: 3px solid #c60000;
+        color: #c60000;
+      }
+    }
+  }
+}
