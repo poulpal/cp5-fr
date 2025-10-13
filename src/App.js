@@ -1,25 +1,26 @@
 import React, { Suspense } from "react";
-import { useLocation, Navigate, json, useParams } from "react-router-dom";
-// ** Router Import
+import { useLocation, Navigate } from "react-router-dom";
 
+// ** Router Import
 import Router from "./router/Router";
-import { isUserLoggedIn, getUserRole } from "./auth/auth";
+
+// ** Auth utils
+import { isUserLoggedIn, getUserRole, isAuthBypassed } from "./auth/auth";
+
+// ** UI/State/Utils
 import BlockUi from "@availity/block-ui";
 import "@src/assets/scss/block.css";
 import { useSelector } from "react-redux";
-import { useEffect } from "react";
 import axios from "axios";
 import { toast } from "react-hot-toast";
-
 import { hotjar } from "react-hotjar";
-import { Crisp } from "crisp-sdk-web";
 import { PrimeReactProvider } from "primereact/api";
-import "primereact/resources/themes/bootstrap4-light-blue/theme.css";
-import apiConfig from "./configs/apiConfig";
 
-const setBuildingData = async () => {
+// در حالت آنلاین، اطلاعات ساختمان را از سرور می‌گیریم
+async function setBuildingData() {
   try {
     const user = JSON.parse(localStorage.getItem("userData"));
+    if (!user) return;
     const role = user.role;
     if (role === "building_manager") {
       const response = await axios.get("building_manager/profile");
@@ -36,87 +37,96 @@ const setBuildingData = async () => {
     }
   } catch (err) {
     localStorage.setItem("buildingSlug", "");
-    console.log(err);
+    // console.log(err);
   }
 }
 
 const App = () => {
   const location = useLocation();
 
-  hotjar.initialize(3430319, 6);
-  // Crisp.configure("29afeb5a-8fa4-4b96-b645-23660ea9f4a8", {
-  //   locale: "fa",
-  // });
+  // Hotjar/Crisp فقط در حالت غیر بای‌پس
+  if (!isAuthBypassed()) {
+    try {
+      hotjar.initialize(3430319, 6);
+      // Crisp.configure("...", { locale: "fa" });
+    } catch (e) {
+      // ignore
+    }
+  }
 
-  if (location && location.pathname === "/paymentStatus") {
-  } else if (location && location.pathname === "/payCharge") {
-  } else if (location && location.pathname === "/pay") {
-  } else if (location && location.pathname === "/logout") {
-  } else if (location && location.pathname === "/faq") {
-  } else if (location && location.pathname === "/newBuilding") {
-  } else if (location && location.pathname === "/transactions") {
-  } else if (location && location.pathname === "/charity") {
-  } else if (location && location.pathname === "/pricing") {
-  } else if (location && location.pathname.startsWith('/reserve/')) {
-  } else if (location && location.pathname.startsWith('/survey/')) {
-  } else {
-    if (!isUserLoggedIn()) {
+  // مسیرهای عمومی که نیازی به لاگین ندارند
+  const isPublicPath =
+    location &&
+    (location.pathname === "/paymentStatus" ||
+      location.pathname === "/payCharge" ||
+      location.pathname === "/pay" ||
+      location.pathname === "/logout" ||
+      location.pathname === "/faq" ||
+      location.pathname === "/newBuilding" ||
+      location.pathname === "/transactions" ||
+      location.pathname === "/charity" ||
+      (location.pathname && location.pathname.startsWith("/reserve/")) ||
+      (location.pathname && location.pathname.startsWith("/survey/")));
+
+  if (!isPublicPath) {
+    // اگر لاگین نیستی و بای‌پس هم خاموش است → به لاگین برو
+    if (!isUserLoggedIn() && !isAuthBypassed()) {
       if (location && location.pathname !== "/login") {
         return <Navigate to="/login" />;
       }
     } else {
-      setBuildingData();
-      const location = useLocation();
-      const params = new URLSearchParams(location.search);
-      const token = params.get('token');
-
-      if (location && location.pathname === "/login") {
-        if (token) {
-          (async () => {
-            try {
-              localStorage.removeItem("accessToken");
-              localStorage.removeItem("userData");
-              localStorage.removeItem("userVerified");
-              localStorage.removeItem("selectedUnit");
-              const response = await axios.get(`${apiConfig.baseUrl}/getMe`, {
-                headers: {
-                  Authorization: `Bearer ${params.get("token")}`,
-                },
-              });
-              localStorage.setItem("accessToken", params.get("token"));
-              localStorage.setItem(
-                "userData",
-                JSON.stringify(response.data.data.user)
-              );
-              localStorage.removeItem("selectedUnit");
-
-              window.location.href = "/";
-            } catch (err) {
-              if (err.response) {
-                const response = err.response;
-                if (response.data.errors) {
-                  for (let key in response.data.errors) {
-                    toast.error(response.data.errors[key]);
-                  }
-                } else if (response.data.message) {
-                  toast.error(response.data.message);
-                } else {
-                  console.log(err);
-                }
-              }
-            }
-          })();
-        }
-        return <Navigate to="/" />;
+      // آنلاین که بودیم، پروفایل ساختمان را می‌گیریم
+      if (!isAuthBypassed()) {
+        setBuildingData();
       }
+
+      // لاگین با توکن موجود در کوئری‌استرینگ (در صورت وجود)
+      const params = new URLSearchParams(location.search);
+      const token = params.get("token");
+      if (
+        token &&
+        (location.pathname === "/" ||
+          location.pathname === "/dashboard" ||
+          location.pathname === "/selectUnit" ||
+          location.pathname === "/profile" ||
+          location.pathname === "/invoices" ||
+          location.pathname === "/units")
+      ) {
+        (async () => {
+          try {
+            const response = await axios.get("/auth/callback/token-login", {
+              params: { token },
+            });
+            localStorage.setItem("accessToken", token);
+            localStorage.setItem("userData", JSON.stringify(response.data.data.user));
+            localStorage.removeItem("selectedUnit");
+            window.location.href = "/";
+          } catch (err) {
+            if (err.response) {
+              const response = err.response;
+              if (response.data.errors) {
+                if (response.data.errors.username) {
+                  toast.error(response.data.errors.username[0]);
+                }
+                if (response.data.errors.password) {
+                  toast.error(response.data.errors.password[0]);
+                }
+              } else {
+                toast.error(response.data.message);
+              }
+            } else {
+              toast.error("خطا در برقراری ارتباط با سرور");
+            }
+          }
+        })();
+      }
+
+      // اگر واحد انتخاب نشده و در صفحه انتخاب واحد نیست، هدایت کن
       const selectedUnit = localStorage.getItem("selectedUnit");
       const userRole = getUserRole();
       if (!selectedUnit && location.pathname !== "/selectUnit") {
         return <Navigate to="/selectUnit" />;
       }
-      // const userData = JSON.parse(localStorage.getItem("userData"));
-      // Crisp.user.setNickname(userData.first_name + " " + userData.last_name);
-      // Crisp.user.setPhone(userData.mobile);
     }
   }
 
@@ -128,7 +138,5 @@ const App = () => {
     </PrimeReactProvider>
   );
 };
-
-
 
 export default App;

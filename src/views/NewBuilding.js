@@ -1,53 +1,15 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
-import { Row, Col, Label, Input, Form, Button, Modal, ModalBody, UncontrolledTooltip } from "reactstrap";
+import { Row, Col, Label, Input, Form, Button } from "reactstrap";
 import LoadingComponent from "@src/components/LoadingComponent";
 import { useNavigate } from "react-router-dom";
 import { Controller, useForm } from "react-hook-form";
-import { useEffect } from "react";
 import { toast } from "react-hot-toast";
 
 import axios from "axios";
 
-
-import whatsapp from "@src/assets/images/icons/whatsapp.png";
-import skype from "@src/assets/images/icons/skype.png";
-import meet from "@src/assets/images/icons/meet.png";
-import telegram from "@src/assets/images/icons/telegram.png";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPhoneSquare } from "@fortawesome/free-solid-svg-icons";
-
-const icons = [
-  {
-    title: "واتسپ",
-    icon: whatsapp,
-    link: "https://wa.me/send?phone=982191031869&text=با درود  خواهشمند است برای مجتمع تحت مدیریت اینجانب یک اکانت دمو فعال نمایید",
-  },
-  // {
-  //   title: "اسکایپ",
-  //   icon: skype,
-  //   link: "https://t.me/poulpal",
-  // },
-  // {
-  //   title: "گوگل میت",
-  //   icon: meet,
-  //   link: "https://t.me/poulpal",
-  // },
-  {
-    title: "تلگرام",
-    icon: telegram,
-    link: "https://t.me/Chargepalir",
-  },
-  // {
-  //   title: "تماس",
-  //   icon: CallIcon,
-  //   link: "tel:982191031869",
-  // }
-];
-
 const NewBuilding = () => {
   const [loading, setLoading] = useState(false);
-  const [modal, setModal] = useState(false);
 
   const {
     control,
@@ -85,7 +47,7 @@ const NewBuilding = () => {
     setValue("last_name", userData.last_name || "");
     setValue("mobile", userData.mobile);
 
-    return () => { };
+    return () => {};
   }, []);
 
   const onFormSubmit = async (data) => {
@@ -135,12 +97,9 @@ const NewBuilding = () => {
   const handleBuyModule = async (module) => {
     setLoading(true);
     try {
-      const response = await axios.post(
-        `building_manager/modules/buy`,
-        {
-          modules: [module]
-        }
-      );
+      const response = await axios.post(`building_manager/modules/buy`, {
+        modules: [module],
+      });
       if (response.data.success) {
         if (response.data.message) {
           toast.success(response.data.message);
@@ -158,58 +117,21 @@ const NewBuilding = () => {
       console.log(err);
     }
     setLoading(false);
-  }
+  };
 
   return (
     <>
       <div>
         <LoadingComponent loading={loading} />
-        <Modal isOpen={modal} toggle={() => setModal(!modal)} centered={true}>
-          <ModalBody>
-            <h3 className="text-center pt-3 pb-2">درخواست دمو {import.meta.env.VITE_APP_NAME}</h3>
-            <div className="d-flex flex-row justify-content-between pb-2 px-sm-3 px-xs-1 px-2">
-              {icons.map((icon, index) => (
-                <div key={index}>
-                  <UncontrolledTooltip
-                    placement="bottom"
-                    target={"support_" + index}
-                  >
-                    {icon.title}
-                  </UncontrolledTooltip>
-                  <div id={"support_" + index} href="#">
-                    <a
-                      href={icon.link}
-                      target="_blank"
-                      rel="noreferrer"
-                      key={index}
-                    >
-                      <img
-                        src={icon.icon}
-                        alt={icon.title}
-                        style={{
-                          width: "50px",
-                          height: "50px",
-                        }}
-                      />
-                    </a>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </ModalBody>
-        </Modal>
+
         <div className="pb-2">
           <h3 className="text-center mb-3">ایجاد ساختمان</h3>
           <Form onSubmit={handleSubmit(onFormSubmit)} className="pb-5">
-            <input
-              type="hidden"
-              {...register("type")}
-              value="building_manager"
-            />
+            <input type="hidden" {...register("type")} value="building_manager" />
             <Row>
               <Col md="6">
                 <div className="mb-2">
-                  <Label for="first_name">نام *</Label>
+                  <Label htmlFor="first_name">نام *</Label>
                   <Controller
                     name="first_name"
                     control={control}
@@ -219,21 +141,20 @@ const NewBuilding = () => {
                         id="first_name"
                         type="text"
                         placeholder="نام"
-                        invalid={errors.first_name ? true : false}
+                        invalid={!!errors.first_name}
                         {...field}
                       />
                     )}
                   />
                   {errors.first_name && (
-                    <div className="text-danger">
-                      {errors.first_name.message}
-                    </div>
+                    <div className="text-danger">{errors.first_name.message}</div>
                   )}
                 </div>
               </Col>
+
               <Col md="6">
                 <div className="mb-2">
-                  <Label for="last_name">نام خانوادگی *</Label>
+                  <Label htmlFor="last_name">نام خانوادگی *</Label>
                   <Controller
                     name="last_name"
                     control={control}
@@ -243,22 +164,20 @@ const NewBuilding = () => {
                         id="last_name"
                         type="text"
                         placeholder="نام خانوادگی"
-                        invalid={errors.last_name ? true : false}
+                        invalid={!!errors.last_name}
                         {...field}
                       />
                     )}
                   />
                   {errors.last_name && (
-                    <div className="text-danger">
-                      {errors.last_name.message}
-                    </div>
+                    <div className="text-danger">{errors.last_name.message}</div>
                   )}
                 </div>
               </Col>
 
               <Col md="6">
                 <div className="mb-2">
-                  <Label for="mobile">تلفن همراه *</Label>
+                  <Label htmlFor="mobile">تلفن همراه *</Label>
                   <Controller
                     name="mobile"
                     control={control}
@@ -268,7 +187,7 @@ const NewBuilding = () => {
                         id="mobile"
                         type="text"
                         placeholder="تلفن همراه"
-                        invalid={errors.mobile ? true : false}
+                        invalid={!!errors.mobile}
                         {...field}
                         disabled
                       />
@@ -282,7 +201,7 @@ const NewBuilding = () => {
 
               {/* <Col md="6">
                 <div className="mb-2">
-                  <Label for="national_id">کد ملی *</Label>
+                  <Label htmlFor="national_id">کد ملی *</Label>
                   <Controller
                     name="national_id"
                     control={control}
@@ -292,21 +211,20 @@ const NewBuilding = () => {
                         id="national_id"
                         type="text"
                         placeholder="کد ملی"
-                        invalid={errors.national_id ? true : false}
+                        invalid={!!errors.national_id}
                         {...field}
                       />
                     )}
                   />
                   {errors.national_id && (
-                    <div className="text-danger">
-                      {errors.national_id.message}
-                    </div>
+                    <div className="text-danger">{errors.national_id.message}</div>
                   )}
                 </div>
               </Col> */}
+
               <Col md="6">
                 <div className="mb-2">
-                  <Label for="building_name">نام ساختمان *</Label>
+                  <Label htmlFor="building_name">نام ساختمان *</Label>
                   <Controller
                     name="building_name"
                     control={control}
@@ -316,21 +234,20 @@ const NewBuilding = () => {
                         id="building_name"
                         type="text"
                         placeholder="نام ساختمان"
-                        invalid={errors.building_name ? true : false}
+                        invalid={!!errors.building_name}
                         {...field}
                       />
                     )}
                   />
                   {errors.building_name && (
-                    <div className="text-danger">
-                      {errors.building_name.message}
-                    </div>
+                    <div className="text-danger">{errors.building_name.message}</div>
                   )}
                 </div>
               </Col>
+
               <Col md="6">
                 <div className="mb-2">
-                  <Label for="building_name_en">نام انگلیسی ساختمان *</Label>
+                  <Label htmlFor="building_name_en">نام انگلیسی ساختمان *</Label>
                   <Controller
                     name="building_name_en"
                     control={control}
@@ -340,21 +257,20 @@ const NewBuilding = () => {
                         id="building_name_en"
                         type="text"
                         placeholder="نام انگلیسی ساختمان"
-                        invalid={errors.building_name_en ? true : false}
+                        invalid={!!errors.building_name_en}
                         {...field}
                       />
                     )}
                   />
                   {errors.building_name_en && (
-                    <div className="text-danger">
-                      {errors.building_name_en.message}
-                    </div>
+                    <div className="text-danger">{errors.building_name_en.message}</div>
                   )}
                 </div>
               </Col>
+
               <Col md="6">
                 <div className="mb-2">
-                  <Label for="unit_count">تعداد واحد ها *</Label>
+                  <Label htmlFor="unit_count">تعداد واحد ها *</Label>
                   <Controller
                     name="unit_count"
                     control={control}
@@ -364,22 +280,21 @@ const NewBuilding = () => {
                         id="unit_count"
                         type="text"
                         placeholder="تعداد واحد ها"
-                        invalid={errors.unit_count ? true : false}
+                        invalid={!!errors.unit_count}
                         {...field}
                         inputMode="tel"
                       />
                     )}
                   />
-                  {errors.phone_number && (
-                    <div className="text-danger">
-                      {errors.unit_count.message}
-                    </div>
+                  {errors.unit_count && (
+                    <div className="text-danger">{errors.unit_count.message}</div>
                   )}
                 </div>
               </Col>
+
               <Col md="6">
                 <div className="mb-2">
-                  <Label for="phone_number">شماره تلفن *</Label>
+                  <Label htmlFor="phone_number">شماره تلفن *</Label>
                   <Controller
                     name="phone_number"
                     control={control}
@@ -389,22 +304,21 @@ const NewBuilding = () => {
                         id="phone_number"
                         type="text"
                         placeholder="شماره تلفن"
-                        invalid={errors.phone_number ? true : false}
+                        invalid={!!errors.phone_number}
                         {...field}
                         inputMode="tel"
                       />
                     )}
                   />
                   {errors.phone_number && (
-                    <div className="text-danger">
-                      {errors.phone_number.message}
-                    </div>
+                    <div className="text-danger">{errors.phone_number.message}</div>
                   )}
                 </div>
               </Col>
+
               <Col md="6">
                 <div className="mb-2">
-                  <Label for="province">استان *</Label>
+                  <Label htmlFor="province">استان *</Label>
                   <Controller
                     name="province"
                     control={control}
@@ -414,7 +328,7 @@ const NewBuilding = () => {
                         id="province"
                         type="text"
                         placeholder="استان"
-                        invalid={errors.province ? true : false}
+                        invalid={!!errors.province}
                         {...field}
                       />
                     )}
@@ -424,9 +338,10 @@ const NewBuilding = () => {
                   )}
                 </div>
               </Col>
+
               <Col md="6">
                 <div className="mb-2">
-                  <Label for="city">شهر *</Label>
+                  <Label htmlFor="city">شهر *</Label>
                   <Controller
                     name="city"
                     control={control}
@@ -436,7 +351,7 @@ const NewBuilding = () => {
                         id="city"
                         type="text"
                         placeholder="شهر"
-                        invalid={errors.city ? true : false}
+                        invalid={!!errors.city}
                         {...field}
                       />
                     )}
@@ -446,9 +361,10 @@ const NewBuilding = () => {
                   )}
                 </div>
               </Col>
+
               <Col md="6">
                 <div className="mb-2">
-                  <Label for="district">منطقه *</Label>
+                  <Label htmlFor="district">منطقه *</Label>
                   <Controller
                     name="district"
                     control={control}
@@ -458,7 +374,7 @@ const NewBuilding = () => {
                         id="district"
                         type="text"
                         placeholder="منطقه"
-                        invalid={errors.district ? true : false}
+                        invalid={!!errors.district}
                         {...field}
                         inputMode="tel"
                       />
@@ -469,9 +385,10 @@ const NewBuilding = () => {
                   )}
                 </div>
               </Col>
+
               <Col md="6">
                 <div className="mb-2">
-                  <Label for="address">آدرس *</Label>
+                  <Label htmlFor="address">آدرس *</Label>
                   <Controller
                     name="address"
                     control={control}
@@ -481,7 +398,7 @@ const NewBuilding = () => {
                         id="address"
                         type="text"
                         placeholder="آدرس"
-                        invalid={errors.address ? true : false}
+                        invalid={!!errors.address}
                         {...field}
                       />
                     )}
@@ -489,38 +406,35 @@ const NewBuilding = () => {
                   {errors.address && (
                     <div className="text-danger">{errors.address.message}</div>
                   )}
-                  <small>
-                    به آدرس های ناقص و غیر قابل شناسایی خدمات داده نخواهد شد.
-                  </small>
+                  <small>به آدرس های ناقص و غیر قابل شناسایی خدمات داده نخواهد شد.</small>
                 </div>
               </Col>
+
               <Col md="6">
                 <div className="mb-2">
-                  <Label for="postal_code">کد پستی</Label>
+                  <Label htmlFor="postal_code">کد پستی</Label>
                   <Controller
                     name="postal_code"
                     control={control}
-                    rules={{ required: true }}
                     render={({ field }) => (
                       <Input
                         id="postal_code"
                         type="text"
                         placeholder="کد پستی"
-                        invalid={errors.postal_code ? true : false}
+                        invalid={!!errors.postal_code}
                         {...field}
                       />
                     )}
                   />
                   {errors.postal_code && (
-                    <div className="text-danger">
-                      {errors.postal_code.message}
-                    </div>
+                    <div className="text-danger">{errors.postal_code.message}</div>
                   )}
                 </div>
               </Col>
+
               <Col md="6">
                 <div className="mb-2">
-                  <Label for="email">ایمیل</Label>
+                  <Label htmlFor="email">ایمیل</Label>
                   <Controller
                     name="email"
                     control={control}
@@ -529,7 +443,7 @@ const NewBuilding = () => {
                         id="email"
                         type="email"
                         placeholder="ایمیل"
-                        invalid={errors.email ? true : false}
+                        invalid={!!errors.email}
                         {...field}
                       />
                     )}
@@ -539,79 +453,10 @@ const NewBuilding = () => {
                   )}
                 </div>
               </Col>
-              {/* <Col md="6">
-                <div className="mb-2">
-                  <Label for="sheba_number">شماره شبا</Label>
-                  <Controller
-                    name="sheba_number"
-                    control={control}
-                    rules={{ required: true }}
-                    render={({ field }) => (
-                      <Input
-                        id="sheba_number"
-                        type="text"
-                        placeholder="شماره شبا"
-                        invalid={errors.sheba_number ? true : false}
-                        {...field}
-                        inputMode="tel"
-                      />
-                    )}
-                  />
-                  {errors.sheba_number && (
-                    <div className="text-danger">
-                      {errors.sheba_number.message}
-                    </div>
-                  )}
-                </div>
-              </Col> */}
-              {/* <Col md="6">
-                <div className="mb-2">
-                  <Label for="card_number">شماره کارت</Label>
-                  <Controller
-                    name="card_number"
-                    control={control}
-                    rules={{ required: true }}
-                    render={({ field }) => (
-                      <Input
-                        id="card_number"
-                        type="text"
-                        placeholder="شماره کارت"
-                        invalid={errors.card_number ? true : false}
-                        {...field}
-                        inputMode="tel"
-                      />
-                    )}
-                  />
-                  {errors.card_number && (
-                    <div className="text-danger">
-                      {errors.card_number.message}
-                    </div>
-                  )}
-                </div>
-              </Col> */}
-              {/* <Col md="6">
-                <div className="mb-2">
-                  <Label for="national_card_image">تصویر کارت ملی *</Label>
-                  <input
-                    name="national_card_image"
-                    type="file"
-                    className="form-control form-control-lg"
-                    accept=".png, .jpg, .jpeg"
-                    invalid={errors.national_card_image ? true : false}
-                    {...register("national_card_image", {
-                      required: "تصویر کارت ملی الزامی است",
-                    })}
-                  />
-                </div>
-                {errors.national_card_image && (
-                  <div className="text-danger">
-                    {errors.national_card_image.message}
-                  </div>
-                )}
-              </Col> */}
+
               <Col md="6">
                 <div className="mb-2">
-                  <Label for="referral_mobile">شماره موبایل معرف</Label>
+                  <Label htmlFor="referral_mobile">شماره موبایل معرف</Label>
                   <Controller
                     name="referral_mobile"
                     control={control}
@@ -621,35 +466,26 @@ const NewBuilding = () => {
                         id="referral_mobile"
                         type="text"
                         placeholder="شماره موبایل معرف"
-                        invalid={errors.referral_mobile ? true : false}
+                        invalid={!!errors.referral_mobile}
                         {...field}
                         inputMode="tel"
                       />
                     )}
                   />
                   {errors.referral_mobile && (
-                    <div className="text-danger">
-                      {errors.referral_mobile.message}
-                    </div>
+                    <div className="text-danger">{errors.referral_mobile.message}</div>
                   )}
                 </div>
               </Col>
             </Row>
-            <Row>
-              <Col md="9">
-                <Button color="primary" type="submit" block>
+
+            {/* دکمه ثبت سراسری */}
+            <Row className="mt-1">
+              <Col xs="12">
+                <Button color="primary" type="submit" className="w-100">
                   ثبت
                 </Button>
               </Col>
-              {import.meta.env.VITE_APP_TYPE == 'main' && (
-                <Col md="3">
-                  <Button color="dark" onClick={() =>
-                    setModal(!modal)
-                  } block outline>
-                    درخواست دمو
-                  </Button>
-                </Col>
-              )}
             </Row>
           </Form>
         </div>
@@ -657,4 +493,5 @@ const NewBuilding = () => {
     </>
   );
 };
+
 export default NewBuilding;

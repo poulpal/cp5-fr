@@ -1,101 +1,138 @@
-import toast from "react-hot-toast";
-import { NavLink, Navigate } from "react-router-dom";
-import { useEffect, useState } from "react";
-import axios from "axios";
-import { Button, Card, CardBody, CardFooter, CardHeader, Col, FormGroup, Input, Label, Modal, ModalBody, ModalHeader, Nav, NavItem, Row } from "reactstrap";
-import LoadingComponent from "../components/LoadingComponent";
-import PriceFormat from "../components/PriceFormat";
-import NavbarComponent from "../components/NavbarComponent";
+import { useEffect, useState } from 'react'
+import { Row, Col, Card, CardBody, CardText, Badge, ListGroup, ListGroupItem, Button } from 'reactstrap'
+import { Check, Star, Briefcase, Plus } from 'react-feather'
+import api from '../configs/apiConfig'
+import PriceFormat from '../components/PriceFormat'
 
-export default () => {
-    const [loading, setLoading] = useState(false);
-    const [modules, setModules] = useState([]);
-    const [activeModules, setActiveModules] = useState([]);
-    const [selectedModules, setSelectedModules] = useState([]);
-    const [showModal, setShowModal] = useState(false);
-
-    const [discountCode, setDiscountCode] = useState(null);
-    const [hasDiscount, setHasDiscount] = useState(false);
-    const [discountValue, setDiscountValue] = useState(null);
-    const [discountType, setDiscountType] = useState(null);
-
-    const getModules = async () => {
-        setLoading(true);
-        try {
-            const response = await axios.get("/public/modules");
-            setModules(response.data.data.modules);
-        } catch (err) {
-            toast.error("خطا در دریافت اطلاعات");
-            console.log(err);
-        }
-        setLoading(false);
-    };
+const Pricing = () => {
+    const [plans, setPlans] = useState([])
+    const [coreModules, setCoreModules] = useState([])
+    const [paidModules, setPaidModules] = useState([])
+    const [isLoading, setIsLoading] = useState(true)
 
     useEffect(() => {
-        getModules();
-        return () => { };
-    }, []);
+        const fetchData = async () => {
+            setIsLoading(true)
+            try {
+                const [plansRes, modulesRes] = await Promise.all([
+                    api.get('/public/plans'),
+                    api.get('/public/modules')
+                ])
+                setPlans(plansRes.data.data)
+                setCoreModules(modulesRes.data.data.filter(m => m.is_core))
+                setPaidModules(modulesRes.data.data.filter(m => !m.is_core))
+            } catch (error) {
+                console.error("Error fetching pricing data", error)
+            } finally {
+                setIsLoading(false)
+            }
+        }
+        fetchData()
+    }, [])
+
+    const planIcons = {
+        0: <Briefcase size={20} />,
+        1: <Star size={20} />,
+        2: <Briefcase size={20} />
+    }
+    const planColors = {
+        0: 'primary',
+        1: 'success',
+        2: 'warning'
+    }
+
 
     return (
-        <>
-            <NavbarComponent centerNavbarBrand={true} />
-            <LoadingComponent loading={loading} />
-            {/* <BuyModuleModal show={showModal} toggle={() => setShowModal(!showModal)} setLoading={setLoading} activeModule={activeModule}/> */}
-            <Card
-                style={{
-                    // minHeight: "89vh",
-                    padding: "1rem",
-                }}
-            >
-                <div className="pb-0 pt-2">
-                    <h3 className="text-center mb-1">پکیج های {import.meta.env.VITE_APP_NAME}</h3>
-                    <Row>
-                        <Col md={2}>
-                        </Col>
-                        <Col md={8}>
-                            {modules.map((group) => (
-                                <div className="mb-3">
-                                    <h4 className="mb-1">
-                                        {group.type}
-                                    </h4>
-                                    <table className="table table-striped table-bordered table-hover table-sm">
-                                        <tr>
-                                            <th style={{ width: '20%' }}>نام</th>
-                                            <th style={{ width: '40%' }}>توضیحات</th>
-                                            <th style={{ width: '20%' }}>قیمت</th>
-                                        </tr>
-                                        {group.modules.map((module) => {
-                                            return (
-                                                <tr>
-                                                    <td>{module.title}</td>
-                                                    <td>{module.description}</td>
-                                                    <td>
-                                                        {module.is_on_offer && module.offer_before_price != null && module.offer_before_price != 0 ?
-                                                            <>
-                                                                <PriceFormat price={module.offer_before_price / 1000} showCurrency={false} decimalScale={1} strikeThrough={true} />
-                                                                {(module.price == 0 ? "رایگان" : <PriceFormat price={module.price / 1000} showCurrency={false} decimalScale={1} />)}
-                                                            </>
-                                                            : ""}
-                                                        {!module.is_on_offer &&
-                                                            (module.price == 0 ? "رایگان" : <PriceFormat price={module.price / 1000} showCurrency={false} decimalScale={1} />)}
+        <div>
+            <div className='text-center'>
+                <h1>پکیج‌ها و قیمت‌گذاری</h1>
+                <p>پلن متناسب با نیاز خود را انتخاب کنید</p>
+            </div>
 
-                                                        {module.is_on_offer && module.offer_description != null ? <><br></br><span className="text-dark"> ({module.offer_description})</span></> : ""}
-                                                    </td>
-                                                </tr>
-                                            )
-                                        })}
-                                    </table>
-                                </div>
-                            ))}
-                        </Col>
-                        <Col md={2}>
-                        </Col>
+            <Row className='pricing-card'>
+                <Col className='mx-auto' md={10} lg={12}>
+                    <Row>
+                        {plans.map((plan, index) => (
+                            <Col key={plan.id} md={4}>
+                                <Card className='text-center'>
+                                    <CardBody>
+                                        <div className={`avatar bg-light-${planColors[index]} p-50 m-auto mb-1`}>
+                                            {planIcons[index]}
+                                        </div>
+                                        <h3>{plan.name}</h3>
+                                        <CardText>{plan.title}</CardText>
+
+                                        <div className='annual-plan'>
+                                            <div className='plan-price mt-2'>
+                                                <sup className='font-medium-1 fw-bold text-primary'>تومان</sup>
+                                                <span className={`pricing-value fw-bolder text-primary`}>
+                                                    <PriceFormat amount={plan.price} />
+                                                </span>
+                                                <sub className='pricing-duration text-body font-medium-1 fw-bold'>/سالیانه</sub>
+                                            </div>
+                                        </div>
+
+                                        <ListGroup flush className='my-2'>
+                                            <ListGroupItem>
+                                                <strong>{plan.max_units < 100 ? `تا ${plan.max_units}` : 'بدون محدودیت'}</strong> واحد
+                                            </ListGroupItem>
+                                            <ListGroupItem>
+                                                تا <strong>{plan.max_managers}</strong> مدیر
+                                            </ListGroupItem>
+                                        </ListGroup>
+
+                                        <Button.Ripple color={planColors[index]} block>
+                                            شروع کنید
+                                        </Button.Ripple>
+                                    </CardBody>
+                                </Card>
+                            </Col>
+                        ))}
                     </Row>
-                </div>
-                <strong className="text-center">
-                    قیمت ها با واحد هزار تومان و مدت پکیج ها یکساله است
-                </strong>
-            </Card>
-        </>
-    );
-};
+                </Col>
+            </Row>
+
+            <div className='text-center mt-5'>
+                <h2>ویژگی‌های اصلی (رایگان در تمام پکیج‌ها)</h2>
+                <p>تمام امکانات زیر به صورت پیش‌فرض در پکیج شما فعال است.</p>
+            </div>
+            <Row className='justify-content-center'>
+                {coreModules.map(module => (
+                    <Col md={3} key={module.id}>
+                        <Card>
+                            <CardBody className='text-center'>
+                                <Check className='text-success' size={40} />
+                                <h4 className='mt-1'>{module.title}</h4>
+                                <p>{module.description}</p>
+                            </CardBody>
+                        </Card>
+                    </Col>
+                ))}
+            </Row>
+
+
+            <div className='text-center mt-5'>
+                <h2>ماژول‌های افزودنی (اختیاری)</h2>
+                <p>قابلیت‌های حرفه‌ای را بر اساس نیاز به پکیج خود اضافه کنید.</p>
+            </div>
+            <Row className='justify-content-center'>
+                {paidModules.map(module => (
+                    <Col md={3} key={module.id}>
+                        <Card>
+                            <CardBody className='text-center'>
+                                <Plus className='text-primary' size={40} />
+                                <h4 className='mt-1'>{module.title}</h4>
+                                <p>{module.description}</p>
+                                <Badge color='light-primary'>
+                                    <PriceFormat amount={module.price} /> تومان
+                                </Badge>
+                            </CardBody>
+                        </Card>
+                    </Col>
+                ))}
+            </Row>
+        </div>
+    )
+}
+
+export default Pricing

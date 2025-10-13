@@ -7,9 +7,9 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCopy } from "@fortawesome/free-solid-svg-icons";
 import { useParams } from "react-router-dom";
 import NavbarComponent from "../components/NavbarComponent";
-import Avatar from "@components/avatar";
+import Avatar from "@components/Avatar";
 
-const Announcements = () => {
+export default () => {
   const { slug } = useParams();
   const [loading, setLoading] = useState(false);
   const [announcements, setAnnouncements] = useState([]);
@@ -96,5 +96,3 @@ const Announcements = () => {
     </>
   );
 };
-
-export default Announcements;

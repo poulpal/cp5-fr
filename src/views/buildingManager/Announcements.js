@@ -71,7 +71,7 @@ const Announcements = () => {
       <LoadingComponent loading={loading} />
       <AddAnnouncementModal
         show={showAddAnnouncementModal}
-        setShow={setShowAddAnnouncementModal} 
+        toggle={() => setShowAddAnnouncementModal(!showAddAnnouncementModal)}
         refreshData={getAnnouncements}
         setLoading={setLoading}
       />
@@ -187,7 +187,7 @@ const Announcements = () => {
             {filteredAnnouncements.length === 0 && (
               <AddAnnouncementModal
                 show={showAddAnnouncementModal}
-              setShow={setShowAddAnnouncementModal}
+                toggle={() => setShowAddAnnouncementModal(!showAddAnnouncementModal)}
                 refreshData={getAnnouncements}
                 setLoading={setLoading}
                 isModal={false}
