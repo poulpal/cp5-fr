@@ -16,17 +16,7 @@ import buildingManagerRoutes from "./buildingManagerRoutes";
 import userRoutes from "./userRoutes";
 import Announcements from "../../views/Announcements";
 
-
-// import PaymentStatus from "../../views/PaymentStatus";
-// import PayCharge from "../../views/PayCharge";
-// import Faq from "../../views/Faq";
-// import NewBuilding from "../../views/NewBuilding";
-// import Reserve from "../../views/Reserve";
-// import Survey from "../../views/Survey";
-// import PayToll from "../../views/PayToll";
-// import Pricing from "../../views/Pricing";
-
-
+// ** Lazy views
 const PaymentStatus = lazy(() => import("../../views/PaymentStatus"));
 const PayCharge = lazy(() => import("../../views/PayCharge"));
 const Faq = lazy(() => import("../../views/Faq"));
@@ -35,7 +25,12 @@ const Reserve = lazy(() => import("../../views/Reserve"));
 const Survey = lazy(() => import("../../views/Survey"));
 const PayToll = lazy(() => import("../../views/PayToll"));
 const Pricing = lazy(() => import("../../views/Pricing"));
+const Login = lazy(() => import("../../views/Login"));
+const Error = lazy(() => import("../../views/Error"));
+// const Charity = lazy(() => import("../../views/Charity"));
 
+// 🔹 Proforma preview (lazy مثل بقیه)
+const ProformaPreview = lazy(() => import("../../pages/Proforma/ProformaPreview"));
 
 const getLayout = {
   blank: <BlankLayout />,
@@ -45,10 +40,6 @@ const getLayout = {
 
 // ** Document title
 const TemplateTitle = "%s";
-
-const Login = lazy(() => import("../../views/Login"));
-const Error = lazy(() => import("../../views/Error"));
-// const Charity = lazy(() => import("../../views/Charity"));
 
 const getUserHomePage = () => {
   const user = JSON.parse(localStorage.getItem("userData"));
@@ -145,6 +136,14 @@ let Routes = [
     path: "/newBuilding",
     element: <NewBuilding />,
   },
+
+  // 🔹 مسیر جدید: پریویو پیش‌فاکتور (بدون JSX سرگردان)
+  {
+    path: "/proforma/:id/preview",
+    element: <ProformaPreview />,
+    meta: { layout: "blank" },
+  },
+
   {
     path: "/error",
     element: <Error />,
@@ -196,7 +195,7 @@ const MergeLayoutRoutes = (layout, defaultLayout) => {
             // eslint-disable-next-line multiline-ternary
             isObjEmpty(route.element.props) && isBlank === false
               ? // eslint-disable-next-line multiline-ternary
-              LayoutWrapper
+                LayoutWrapper
               : Fragment;
 
           route.element = (

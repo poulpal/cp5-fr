@@ -88,7 +88,8 @@ const BuyModuleModal = ({ show, toggle, setLoading, activeModule, activeDuration
                 }
             );
             if (response.data.success) {
-                setDiscountedPrice(response.data.data.price);
+                // ✅ استفاده از final_price که شامل VAT روی قیمت تخفیف‌خورده است
+                setDiscountedPrice(response.data.data.final_price);
                 setLoading(false);
             }
         } catch (error) {

@@ -1,164 +1,249 @@
-import toast from "react-hot-toast";
-import { NavLink, Navigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+// ===== src/views/buildingManager/Plans.js =====
+// نمایش پکیج‌ها با قیمت‌گذاری «بر اساس تعداد واحد»
+// - لیست پکیج‌ها:  GET /public/plans  (عنوان/ویژگی‌ها)
+// - قیمت هر پکیج:  POST /v1/building_manager/proforma/preview  (محاسبه واقعی واحدی)
+// نکته: این صفحه در پنل مدیرساختمان است، پس توکن باید در localStorage باشد.
+
+import React from "react";
 import axios from "axios";
-import LoadingComponent from "../../components/LoadingComponent";
-import { Button, Card, CardBody, CardFooter, CardHeader, Col, Modal, ModalBody, ModalHeader, Nav, NavItem, Row } from "reactstrap";
-import classNames from "classnames";
-import PriceFormat from "../../components/PriceFormat";
-import BuyPlanModal from "../../components/buildingManager/plans/buyPlanModal";
-import { NumericFormat } from "react-number-format";
 
-export default () => {
-    const [loading, setLoading] = useState(false);
-    const [plans, setPlans] = useState([]);
-    const [durations, setDurations] = useState([]);
-    const [features, setFeatures] = useState([]);
-    const [activePlan, setActivePlan] = useState(null);
-    const [activeDuration, setActiveDuration] = useState(null);
-    const [showModal, setShowModal] = useState(false);
+// ===== تنظیمات و ثابت‌ها =====
+// اگر فرانت و بک‌اند روی دامنه جدا هستند، VITE_API_BASE_URL را در زمان بیلد ست کن
+const API_BASE = import.meta.env.VITE_API_BASE_URL || "";
 
-    const getPlans = async () => {
-        setLoading(true);
-        try {
-            const response = await axios.get("/public/plans");
-            setPlans(response.data.data.plans);
-            setDurations(response.data.data.durations);
-            response.data.data.plans.map((plan) => {
-                setFeatures([...features, ...plan.features]);
-            })
+// دوره‌های قابل انتخاب
+const PERIODS = [
+  { key: "monthly", label: "ماهانه" },
+  { key: "quarterly", label: "سه‌ماهه" },
+  { key: "yearly", label: "سالانه" },
+];
 
-        } catch (err) {
-            toast.error("خطا در دریافت اطلاعات");
-            console.log(err);
-        }
-        setLoading(false);
+// فرمت ساده اعداد
+const nf = (n) => (typeof n === "number" ? n.toLocaleString("fa-IR") : "—");
+
+// ساخت کلاینت axios با baseURL (در صورت نیاز)
+const http = axios.create({
+  baseURL: API_BASE,
+});
+
+// اینترسپتور ساده برای هدر Authorization
+http.interceptors.request.use((config) => {
+  const token = localStorage.getItem("token");
+  if (token) config.headers.Authorization = `Bearer ${token}`;
+  return config;
+});
+
+export default function Plans() {
+  // ===== وضعیت‌ها =====
+  const [loading, setLoading] = React.useState(true);
+  const [error, setError] = React.useState("");
+  const [plans, setPlans] = React.useState([]); // [{slug,title,features:[]}, ...]
+  const [features, setFeatures] = React.useState([]); // لیست یکتا از همهٔ ویژگی‌ها
+  const [period, setPeriod] = React.useState("monthly"); // دورهٔ فعال
+  const [priceMap, setPriceMap] = React.useState({}); // { [slug]: { total, currency } }
+  const [priceLoading, setPriceLoading] = React.useState(false);
+
+  // ===== دریافت لیست پکیج‌ها از API عمومی =====
+  React.useEffect(() => {
+    let mounted = true;
+    setLoading(true);
+    setError("");
+
+    http
+      .get("/public/plans")
+      .then(({ data }) => {
+        const list = Array.isArray(data?.data?.plans) ? data.data.plans : [];
+        if (!mounted) return;
+
+        setPlans(list);
+
+        // استخراج لیست یکتای ویژگی‌ها برای جدول مقایسه
+        const fset = new Set();
+        list.forEach((p) => (p.features || []).forEach((f) => fset.add(f)));
+        setFeatures(Array.from(fset));
+      })
+      .catch((e) => {
+        setError(
+          e?.response?.data?.message ||
+            e?.message ||
+            "خطا در دریافت لیست پکیج‌ها"
+        );
+      })
+      .finally(() => {
+        if (mounted) setLoading(false);
+      });
+
+    return () => {
+      mounted = false;
     };
+  }, []);
 
-    useEffect(() => {
-        getPlans();
-        const uniqueFeatures = [...new Set(features)];
-        setFeatures(uniqueFeatures);
-        return () => { };
-    }, []);
+  // ===== هر بار که لیست پکیج‌ها آماده شد یا دوره عوض شد → قیمت‌های واقعی را از preview بگیر =====
+  React.useEffect(() => {
+    if (!plans.length) return;
 
-    console.log(features);
+    let mounted = true;
+    setPriceLoading(true);
 
-    return (
-        <>
-            <LoadingComponent loading={loading} />
-            <BuyPlanModal show={showModal} toggle={() => setShowModal(!showModal)} setLoading={setLoading} activePlan={activePlan} activeDuration={activeDuration} />
-            <Card
-                style={{
-                    minHeight: "89vh",
-                    padding: "1rem",
-                }}
-            >
-                <div className="pb-5 pt-2">
-                    <h3 className="text-center mb-1">اشتراک {import.meta.env.VITE_APP_NAME}</h3>
-                    <Row>
-                        <Col md={3} className="d-md-block d-none">
-                            <Card className="plan-card">
-                                <CardHeader style={{
-                                    borderBottom: "solid 1px #e0e0e0",
-                                    marginBottom: "1rem",
-                                    color: "#fff",
-                                    backgroundColor: "var(--bs-primary)"
-                                }}>
-                                    <span className="text-center w-100 text-white fs-4">ویژگی ها</span>
-                                </CardHeader>
-                                <CardBody>
-                                    {features.map((feature) => (
-                                        <div className="d-flex justify-content-center mb-1 fs-5 fw-bold text-center align-items-center" key={feature} style={{ 
-                                            height: "35px"
-                                         }}>
-                                            {/* <span className="text-success me-1">✓</span> */}
-                                            <span>{feature}</span>
-                                        </div>
-                                    ))}
-                                </CardBody>
-                                <CardFooter>
-                                    {durations.map((duration) => (
-                                        <Button
-                                            key={duration}
-                                            style={{
-                                                width: '100%',
-                                            }}
-                                            className="btn-primary mb-1 d-flex justify-content-center"
-                                            onClick={() => {
-                                            }}
-                                        >
-                                            <span>
-                                                {duration} ماه
-                                            </span>
-                                        </Button>
-                                    ))}
-                                </CardFooter>
-                            </Card>
-                        </Col>
-                        {plans.map((plan) => (
-                            <Col md={3} key={plan.slug}>
-                                <Card className="plan-card">
-                                    <CardHeader style={{
-                                        borderBottom: "solid 1px #e0e0e0",
-                                        marginBottom: "1rem",
-                                        color: "#fff",
-                                        backgroundColor: "var(--bs-primary)"
-                                    }}>
-                                        <span className="text-center w-100 text-white fs-5">اشتراک {plan.title}</span>
-                                    </CardHeader>
-                                    <CardBody>
-                                        {features.map((feature) => (
-                                            <div className="d-flex justify-content-between justify-content-md-center align-items-center mb-1" key={feature} style={{ 
-                                                height: "35px"
-                                             }}>
-                                                <span className="d-block d-md-none">{feature}</span>
-                                                {plan.features.includes(feature) ? (
-                                                    <span className="text-success me-1 fs-5">✓</span>
-                                                ) : (
-                                                    <span className="text-danger me-1 fs-5">✗</span>
-                                                )}
+    // برای هر پکیج یک درخواست preview می‌زنیم
+    Promise.all(
+      plans.map((p) =>
+        http
+          .post("/v1/building_manager/proforma/preview", {
+            package_slug: p.slug,
+            period: period,
+            discount: 0,
+            tax_percent: 0,
+          })
+          .then(({ data }) => {
+            const d = data?.data;
+            return { slug: p.slug, total: d?.total ?? null, currency: d?.currency ?? "IRR" };
+          })
+          .catch(() => ({ slug: p.slug, total: null, currency: "IRR" }))
+      )
+    )
+      .then((rows) => {
+        if (!mounted) return;
+        const map = {};
+        rows.forEach((r) => (map[r.slug] = { total: r.total, currency: r.currency }));
+        setPriceMap(map);
+      })
+      .finally(() => {
+        if (mounted) setPriceLoading(false);
+      });
 
-                                            </div>
-                                        ))}
-                                    </CardBody>
-                                    <CardFooter>
-                                        {plan.durations.map((duration) => (
-                                            <Button
-                                                key={duration.months}
-                                                style={{
-                                                    width: '100%',
-                                                }}
-                                                className="btn-primary mb-1 d-flex justify-content-between justify-content-md-center"
-                                                onClick={() => {
-                                                    if (duration.price == 'call') {
-                                                        return window.open(`tel:982191031869`, "_blank");
-                                                    }
-                                                    setActivePlan(plan);
-                                                    setActiveDuration(duration);
-                                                    setShowModal(true);
-                                                }}
-                                            >
-                                                <span className="d-block d-md-none">
-                                                    {duration.months} ماه
-                                                </span>
-                                                {duration.price == 'call' ? (<span> تماس بگیرید</span>) :
-                                                    (<NumericFormat
-                                                        value={duration.price / 1000}
-                                                        displayType={"text"}
-                                                        thousandSeparator={true}
-                                                        decimalScale={4}
-                                                    />)}
-                                            </Button>
-                                        ))}
-                                    </CardFooter>
-                                </Card>
-                            </Col>
-                        ))}
-                    </Row>
-                    <span className="d-block w-100 text-center fs-5"> تمامی قیمت ها به هزار تومان است.</span>
-                </div>
-            </Card>
-        </>
-    );
+    return () => {
+      mounted = false;
+    };
+  }, [plans, period]);
+
+  // ===== هندل کلیک خرید =====
+  const handleBuy = async (pkgSlug) => {
+    // اینجا فقط نمونه نشان می‌دهیم. اگر flow خرید دارید، همان را صدا بزنید.
+    // پیشنهاد: ابتدا یک پیش‌فاکتور واقعی بسازید و سپس به صفحهٔ فاکتور/درگاه بروید.
+    try {
+      const { data } = await http.post("/v1/building_manager/proforma", {
+        package_slug: pkgSlug,
+        period,
+        discount: 0,
+        tax_percent: 0,
+      });
+      const id = data?.data?.id;
+      if (id) {
+        // مثلا نمایش HTML فاکتور
+        window.open(`${API_BASE}/v1/building_manager/proforma/${id}/html`, "_blank");
+      } else {
+        alert("پیش‌فاکتور ساخته شد اما شناسه‌ای برنگشت.");
+      }
+    } catch (e) {
+      alert("خطا در ساخت پیش‌فاکتور. دوباره تلاش کنید.");
+    }
+  };
+
+  // ===== UI =====
+  if (loading) return <div>در حال بارگذاری پکیج‌ها…</div>;
+  if (error) return <div style={{ color: "crimson" }}>{error}</div>;
+  if (!plans.length) return <div>هیچ پکیجی یافت نشد.</div>;
+
+  return (
+    <div style={{ padding: 16 }}>
+      {/* انتخاب دوره */}
+      <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
+        {PERIODS.map((p) => (
+          <button
+            key={p.key}
+            onClick={() => setPeriod(p.key)}
+            style={{
+              padding: "8px 12px",
+              borderRadius: 8,
+              border: "1px solid #ddd",
+              background: period === p.key ? "#eef" : "#fff",
+              cursor: "pointer",
+            }}
+          >
+            {p.label}
+          </button>
+        ))}
+      </div>
+
+      {/* جدول ویژگی‌ها به‌همراه ستون قیمت واقعی از preview */}
+      <div style={{ overflowX: "auto" }}>
+        <table style={{ width: "100%", borderCollapse: "collapse" }}>
+          <thead>
+            <tr>
+              <th style={th}>ویژگی‌ها</th>
+              {plans.map((p) => (
+                <th key={p.slug} style={th}>
+                  {p.title || p.slug}
+                  <div style={{ fontSize: 12, color: "#666", marginTop: 4 }}>
+                    {priceLoading
+                      ? "در حال محاسبه…"
+                      : priceMap[p.slug]?.total != null
+                      ? `قیمت ${PERIODS.find(x => x.key === period)?.label}: ${nf(priceMap[p.slug].total)} ${priceMap[p.slug].currency}`
+                      : "در دسترس نیست"}
+                  </div>
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {features.map((f) => (
+              <tr key={f}>
+                <td style={tdPrimary}>{f}</td>
+                {plans.map((p) => (
+                  <td key={p.slug + f} style={td}>
+                    {(p.features || []).includes(f) ? "✓" : "—"}
+                  </td>
+                ))}
+              </tr>
+            ))}
+            {/* ردیف دکمهٔ خرید */}
+            <tr>
+              <td style={tdPrimary}>اقدام</td>
+              {plans.map((p) => (
+                <td key={p.slug + "-buy"} style={td}>
+                  <button
+                    onClick={() => handleBuy(p.slug)}
+                    disabled={priceMap[p.slug]?.total == null}
+                    style={{
+                      padding: "6px 10px",
+                      borderRadius: 6,
+                      border: "1px solid #bbb",
+                      background: "#fff",
+                      cursor: priceMap[p.slug]?.total == null ? "not-allowed" : "pointer",
+                    }}
+                  >
+                    خرید {p.title || p.slug}
+                  </button>
+                </td>
+              ))}
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p style={{ marginTop: 12, color: "#666", fontSize: 12 }}>
+        قیمت‌ها توسط سرور و بر اساس تعداد واحدهای مجتمع شما محاسبه می‌شوند.
+      </p>
+    </div>
+  );
+}
+
+// ===== سبک‌های سادهٔ جدول =====
+const th = {
+  border: "1px solid #e5e5e5",
+  padding: "10px",
+  background: "#fafafa",
+  textAlign: "center",
+  whiteSpace: "nowrap",
+};
+const td = {
+  border: "1px solid #f0f0f0",
+  padding: "8px",
+  textAlign: "center",
+};
+const tdPrimary = {
+  ...td,
+  textAlign: "right",
+  background: "#fcfcfc",
 };

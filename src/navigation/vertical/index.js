@@ -59,6 +59,23 @@ if (selectedUnit == 'buildingManager') {
 
 const activeModules = JSON.parse(localStorage.getItem("activeModules")) ?? [];
 
+
+// ===== کمکی: الیاس اسلاگ‌ها و چک دسترسی ماژول =====
+const MODULE_ALIASES = {
+  'accounting-advanced':    ['accounting-advanced-1','accounting-advanced-qr'],
+  'accounting-advanced-1':  ['accounting-advanced','accounting-advanced-qr'],
+  'accounting-advanced-qr': ['accounting-advanced','accounting-advanced-1']
+};
+
+const activeModuleSlugs = (activeModules || []).map(m => (m && m.slug) ? m.slug : m);
+
+const hasModule = (requiredSlug) => {
+  const set = new Set([requiredSlug, ...(MODULE_ALIASES[requiredSlug] || [])]);
+  return activeModuleSlugs.some(s => set.has(s));
+};
+
+
+
 export const userNavigation = [
   {
     id: "home",
@@ -338,19 +355,19 @@ export const buildingManagerNavigation = [
         id: "accounts",
         title: "کدینگ",
         navLink: "/buildingManager/accounts",
-        locked: !activeModules.filter((module) => module.slug == "accounting-basic").length,
+        locked: !hasModule("accounting-advanced"),
       },
       {
         id: "addDocument",
         title: "سند جدید",
         navLink: "/buildingManager/addDocument",
-        locked: !activeModules.filter((module) => module.slug == "accounting-advanced-1").length,
+        locked: !hasModule("accounting-advanced"),
       },
       {
         id: "documents",
         title: "اسناد",
         navLink: "/buildingManager/documents",
-        locked: !activeModules.filter((module) => module.slug == "accounting-basic").length,
+        locked: !hasModule("accounting-advanced"),
       },
       {
         id: "accountingReports",
@@ -361,37 +378,37 @@ export const buildingManagerNavigation = [
             id: "journal",
             title: "دفتر روزنامه",
             navLink: "/buildingManager/reports/journal",
-            locked: !activeModules.filter((module) => module.slug == "accounting-advanced-1").length,
+            locked: !hasModule("accounting-advanced"),
           },
           {
             id: "ledger",
             title: "دفتر کل",
             navLink: "/buildingManager/reports/ledger",
-            locked: !activeModules.filter((module) => module.slug == "accounting-advanced-1").length,
+            locked: !hasModule("accounting-advanced"),
           },
           {
             id: "accountLedger",
             title: "دفتر حساب",
             navLink: "/buildingManager/reports/accountLedger",
-            locked: !activeModules.filter((module) => module.slug == "accounting-advanced-1").length,
+            locked: !hasModule("accounting-advanced"),
           },
           {
             id: "trialBalance",
             title: "تراز آزمایشی",
             navLink: "/buildingManager/reports/trialBalance",
-            locked: !activeModules.filter((module) => module.slug == "accounting-advanced-1").length,
+            locked: !hasModule("accounting-advanced"),
           },
           {
             id: "balanceSheet",
             title: "ترازنامه",
             navLink: "/buildingManager/reports/balanceSheet",
-            locked: !activeModules.filter((module) => module.slug == "accounting-advanced-1").length,
+            locked: !hasModule("accounting-advanced"),
           },
           {
             id: "profitAndLoss",
             title: "صورت سود و زیان",
             navLink: "/buildingManager/reports/profitAndLoss",
-            locked: !activeModules.filter((module) => module.slug == "accounting-advanced-1").length,
+            locked: !hasModule("accounting-advanced"),
           },
           // {
           //   id: "depositRequests",
