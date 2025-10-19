@@ -40,13 +40,12 @@ export default ({
     handleSubmit,
     formState: { errors },
     reset,
-    control,
-    setError,
+    control,                      // ✅ اضافه شد تا Controller کار کند
+    setError: addUnitSetError,
     setValue
   } = useForm();
 
   const [activeTab, setActiveTab] = useState("details");
-
   const currency = localStorage.getItem("currency");
 
   const onAddUnitSubmit = async (formData) => {
@@ -54,6 +53,7 @@ export default ({
     try {
       const response = await axios.put("/building_manager/units/" + unit.id, {
         ...formData,
+        late_fine_only_last_cycle: !!formData.late_fine_only_last_cycle,
         charge_fee:
           typeof formData.charge_fee === "string"
             ? parseFloat(formData.charge_fee.replace(/,/g, "")) / (currency === "rial" ? 10 : 1)
@@ -66,8 +66,11 @@ export default ({
           typeof formData.area === "string"
             ? parseFloat(formData.area.replace(/,/g, ""))
             : formData.area,
+        resident_count:
+          typeof formData.resident_count === "string"
+            ? parseFloat(formData.resident_count.replace(/,/g, ""))
+            : formData.resident_count,
       });
-
       toast.success(response.data.message);
       setUnitDetailModal(false);
       refreshData();
@@ -89,7 +92,7 @@ export default ({
     setValue("unit_number", unit.unit_number);
     setValue("charge_fee", unit.charge_fee * (currency === "rial" ? 10 : 1));
     setValue("rent_fee", unit.rent_fee * (currency === "rial" ? 10 : 1));
-    return () => { };
+    return () => {};
   }, [unit]);
 
   return (
@@ -98,35 +101,51 @@ export default ({
       toggle={() => setUnitDetailModal(!unitDetailModal)}
       centered={true}
       color="primary"
-      size="xl"
+      size="lg"
     >
-      <ModalHeader toggle={() => setUnitDetailModal(!unitDetailModal)}>
-        جزئیات واحد {unit.unit_number}
+      <ModalHeader
+        toggle={() => setUnitDetailModal(!unitDetailModal)}
+        className="d-flex justify-content-between align-items-center"
+      >
+        <div className="d-block">
+          <div>ویرایش واحد</div>
+          <small className="text-muted">
+            واحد شماره {unit.unit_number}
+          </small>
+        </div>
       </ModalHeader>
       <ModalBody>
-        <Nav pills>
+        <Nav tabs>
           <NavItem>
             <NavLink
+              active={activeTab === "details"}
+              onClick={() => setActiveTab("details")}
               className={classnames({ active: activeTab === "details" })}
-              onClick={() => {
-                setActiveTab("details");
-              }}
             >
-              اطلاعات واحد
+              جزئیات واحد
             </NavLink>
           </NavItem>
           <NavItem>
             <NavLink
-              className={classnames({ active: activeTab === "past_residents" })}
-              onClick={() => {
-                setActiveTab("past_residents");
-              }}
+              active={activeTab === "residents"}
+              onClick={() => setActiveTab("residents")}
+              className={classnames({ active: activeTab === "residents" })}
             >
-              سابقه سکونت
+              ساکنین کنونی
+            </NavLink>
+          </NavItem>
+          <NavItem>
+            <NavLink
+              active={activeTab === "past_residents"}
+              onClick={() => setActiveTab("past_residents")}
+              className={classnames({ active: activeTab === "past_residents" })}
+            >
+              ساکنین سابق
             </NavLink>
           </NavItem>
         </Nav>
-        <TabContent activeTab={activeTab}>
+
+        <TabContent activeTab={activeTab} className="p-2">
           <TabPane tabId="details">
             <Form onSubmit={handleSubmit(onAddUnitSubmit)}>
               <Row>
@@ -144,6 +163,7 @@ export default ({
                     )}
                   </div>
                 </Col>
+
                 <Col md={6}>
                   <div className="mb-2">
                     <Label>مساحت (متر مربع)</Label>
@@ -165,6 +185,7 @@ export default ({
                     )}
                   </div>
                 </Col>
+
                 <Col md={6}>
                   <div className="mb-2">
                     <Label>تعداد نفرات</Label>
@@ -174,27 +195,19 @@ export default ({
                       defaultValue={unit.resident_count}
                       render={({ field }) => (
                         <NumericFormat
-                          thousandSeparator={false}
+                          thousandSeparator={true}
                           className="form-control"
                           {...field}
                           inputMode="tel"
                         />
                       )}
                     />
-                    {errors.area && (
-                      <div className="text-danger">تعداد ساکنین واحد را وارد کنید</div>
+                    {errors.resident_count && (
+                      <div className="text-danger">تعداد نفرات را وارد کنید</div>
                     )}
                   </div>
                 </Col>
-              </Row>
-              <UnitResidents
-                unit={unit}
-                unitDetailModal={unitDetailModal}
-                setUnitDetailModal={setUnitDetailModal}
-                setLoading={setLoading}
-                refreshData={refreshData}
-              />
-              <Row>
+
                 <Col md={12}>
                   <div className="mb-2">
                     {currency === "rial" ? (
@@ -207,10 +220,7 @@ export default ({
                       control={control}
                       rules={{
                         required: "شارژ ماهانه الزامی است",
-                        min: {
-                          value: 0,
-                          message: "شارژ ماهانه نمی تواند منفی باشد",
-                        },
+                        min: { value: 0, message: "شارژ ماهانه نمی تواند منفی باشد" },
                       }}
                       render={({ field }) => (
                         <NumericFormat
@@ -227,6 +237,7 @@ export default ({
                   </div>
                 </Col>
               </Row>
+
               {hasRent && (
                 <Row>
                   <Col md={12}>
@@ -241,10 +252,7 @@ export default ({
                         control={control}
                         rules={{
                           required: "اجاره ماهانه الزامی است",
-                          min: {
-                            value: 0,
-                            message: "اجاره ماهانه نمی تواند منفی باشد",
-                          },
+                          min: { value: 0, message: "اجاره ماهانه نمی تواند منفی باشد" },
                         }}
                         render={({ field }) => (
                           <NumericFormat
@@ -262,26 +270,56 @@ export default ({
                   </Col>
                 </Row>
               )}
+
+              {/* جریمهٔ تأخیر: فقط ماه اخیر */}
+              <div className="mb-2 mt-2">
+                <Label className="d-block mb-1">جریمهٔ تأخیر</Label>
+                <div className="form-check">
+                  <Controller
+                    name="late_fine_only_last_cycle"
+                    control={control}
+                    defaultValue={!!unit.late_fine_only_last_cycle}
+                    render={({ field }) => (
+                      <Input
+                        type="checkbox"
+                        className="form-check-input"
+                        id="late_fine_only_last_cycle"
+                        checked={!!field.value}
+                        onChange={(e) => field.onChange(e.target.checked)}
+                      />
+                    )}
+                  />
+                  <Label className="form-check-label" htmlFor="late_fine_only_last_cycle">
+                    فقط روی شارژ ماه اخیر جریمه بنشیند
+                  </Label>
+                </div>
+                <small className="text-muted d-block">
+                  در این حالت، جریمهٔ تأخیر فقط بر ماندهٔ «آخرین شارژ ماهانهٔ این واحد» اعمال می‌شود.
+                </small>
+              </div>
+
               <Row>
                 <div className="mt-0 d-flex justify-content-center w-100">
                   <Button
                     color="primary"
                     type="submit"
-                    style={{
-                      minWidth: "150px",
-                    }}
+                    style={{ minWidth: "150px" }}
                   >
-                    ویرایش
+                    ثبت
                   </Button>
                 </div>
               </Row>
             </Form>
           </TabPane>
+
+          <TabPane tabId="residents">
+            <UnitResidents unit={unit} />
+          </TabPane>
+
           <TabPane tabId="past_residents">
             <PastResidentsTable past_residents={unit.past_residents} />
           </TabPane>
         </TabContent>
-
       </ModalBody>
     </Modal>
   );

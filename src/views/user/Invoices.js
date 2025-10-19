@@ -15,7 +15,7 @@ const invoices = () => {
   const [data, setdata] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  const ismobile = false;
+  const ismobile = useMediaQuery({ maxWidth: 768 });
 
   useEffect(() => {
     (async () => {
@@ -39,11 +39,6 @@ const invoices = () => {
 
   let columns = [
     {
-      name: "#",
-      selector: (row) => row.id,
-      sortable: true,
-    },
-    {
       name: "تاریخ",
       selector: (row) => row.created_at,
       sortable: true,
@@ -58,7 +53,14 @@ const invoices = () => {
   ];
 
   if (!ismobile) {
-    columns = columns.concat([
+    columns = [
+      {
+        name: "#",
+        selector: (row) => row.id,
+        sortable: true,
+      },
+      ...columns,
+    ].concat([
       {
         name: "شرح",
         selector: (row) => row.description,
@@ -105,6 +107,18 @@ const invoices = () => {
           data={data}
           {...tableConfig}
           expandableRows
+          expandOnRowClicked={true}
+          conditionalRowStyles={[
+            {
+              when: row => row.is_verified === true,
+              style: {
+                backgroundColor: 'rgba(40, 199, 111, 0.15)',
+                '&:hover': {
+                  backgroundColor: 'rgba(40, 199, 111, 0.25)',
+                },
+              },
+            },
+          ]}
           expandableRowsComponent={({ data }) => (
             <div className="px-2 py-1">
               <div className="">
@@ -117,10 +131,6 @@ const invoices = () => {
                   <span className="ml-2">{data.trace_number}</span>
                 </div>
               )}
-              <div className="">
-                <span className="font-weight-bold">واحد :</span>
-                <span className="ml-2">{data.unit?.unit_number}</span>
-              </div>
               <div className="">
                 <span className="font-weight-bold">ساختمان :</span>
                 <span className="ml-2">{data.unit?.building.name}</span>

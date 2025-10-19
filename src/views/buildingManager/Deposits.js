@@ -347,38 +347,62 @@ const Deposits = () => {
     return excelData;
   };
 
-  const handleGetPdf = async (name) => {
-    if (isNative() && window.ReactNativeWebView){
-      window.ReactNativeWebView.postMessage(JSON.stringify({
-        action: "downloadPdf",
-        type: "pdf",
-        name: name,
-        url: `/building_manager/invoices/pdf?type=deposit&filter=all&paginate=1&page=${page}&perPage=${perPage}&sort=${sort}&order=${order}&search=${search}&start_date=${rangeStart}&end_date=${rangeEnd}`,
-        token: localStorage.getItem("accessToken"),
-        baseUrl: apiConfig.baseUrl,
-        method: "GET",
-      }));
-      return;
-    }
-    setLoading(true);
-    try {
-      const response = await axios.get(`/building_manager/invoices/pdf?type=deposit&filter=all&paginate=1&page=${page}&perPage=${perPage}&sort=${sort}&order=${order}&search=${search}&start_date=${rangeStart}&end_date=${rangeEnd}`, {
-        responseType: "blob",
-      });
-      const url = window.URL.createObjectURL(
-        new Blob([response.data], { type: "application/pdf" })
-      );
-      const link = document.createElement("a");
-      link.href = url;
-      link.setAttribute("download", name + ".zip");
-      link.click();
-    } catch (err) {
-      if (err.response && err.response.data.message) {
-        toast.error(err.response.data.message);
+  const handleGetPdf = async (name = "deposits") => {
+  if (isNative() && window.ReactNativeWebView) {
+    window.ReactNativeWebView.postMessage(JSON.stringify({
+      action: "downloadPdf",
+      type: "pdf",
+      name,
+      url: `/building_manager/invoices/pdf?type=deposit&sort=${sort}&order=${order}&search=${search}&start_date=${rangeStart}&end_date=${rangeEnd}`,
+      token: localStorage.getItem("accessToken"),
+      baseUrl: apiConfig.baseUrl,
+      method: "GET",
+      // ارسال پارامترها برای نسخه نیتیو
+      params: {
+        type: "deposit",
+        sort,
+        order,
+        search,
+        start_date: rangeStart,
+        end_date: rangeEnd
       }
+    }));
+    return;
+  }
+  setLoading(true);
+  try {
+    const response = await axios.get(`/building_manager/invoices/pdf`, {
+      responseType: "blob",
+      params: {
+        type: "deposit",
+        sort,
+        order,
+        search,
+        start_date: rangeStart,
+        end_date: rangeEnd
+      }
+    });
+    const blob = new Blob([response.data], { type: "application/pdf" });
+    const url = window.URL.createObjectURL(blob);
+    // نمایش در تب جدید + امکان دانلود
+    window.open(url, "_blank");
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", `${name}.pdf`);
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.URL.revokeObjectURL(url);
+  } catch (err) {
+    if (err.response && err.response.data?.message) {
+      toast.error(err.response.data.message);
+    } else {
+      toast.error("خطا در دریافت خروجی PDF");
     }
-    setLoading(false);
-  };
+    console.error(err);
+  }
+  setLoading(false);
+};
 
   const handleGetReceiptPdf = async (id) => {
     if (isNative() && window.ReactNativeWebView){

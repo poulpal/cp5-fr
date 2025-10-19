@@ -255,28 +255,6 @@ const VerticalLayout = (props) => {
           </div>
         ) : null
       } */}
-      {
-        getUserRole() !== 'user' ? (
-          <div className="get-plus">
-            <ScrollToTop showOffset={0} className="">
-              <Link to="/buildingManager/modules">
-                <Button className="btn-icon" color="primary">
-                  قیمت ها
-                </Button>
-              </Link>
-            </ScrollToTop>
-          </div>
-        ) : null
-      }
-      <div className="go-home">
-        <ScrollToTop showOffset={0} className="">
-          <Link to="/">
-            <Button className="btn-icon" color="primary">
-              بازگشت به صفحه اصلی
-            </Button>
-          </Link>
-        </ScrollToTop>
-      </div>
     </div >
   );
 };

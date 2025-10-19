@@ -4,6 +4,7 @@ import axios from "axios";
 import LoadingComponent from "../../components/LoadingComponent";
 import { Button, Card, Col, FormGroup, Input, Label, Row } from "reactstrap";
 import moment from "moment-jalaali";
+import RentAddonCard from "../../components/buildingManager/features/RentAddonCard";
 
 /**
  * قیمت‌گذاری انگیزشی:
@@ -439,6 +440,9 @@ export default function ModulesPage() {
           </div>
         </div>
       </Card>
+
+      <RentAddonCard onActivated={getModules} />
+
     </>
   );
 }

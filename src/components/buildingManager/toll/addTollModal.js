@@ -35,6 +35,9 @@ export default ({ show, setShow, setLoading, refreshData }) => {
 
   const [units, setUnits] = useState([]);
   const [activeTab, setActiveTab] = useState("single");
+  const [sendSMS, setSendSMS] = useState(false); // ✅ State برای ارسال SMS
+  const [smsBalance, setSmsBalance] = useState(0); // ✅ موجودی SMS
+  
   const {
     register,
     handleSubmit,
@@ -56,11 +59,30 @@ export default ({ show, setShow, setLoading, refreshData }) => {
     }
   };
 
+  // ✅ دریافت موجودی SMS
+  const getSmsBalance = async () => {
+    try {
+      const response = await axios.get("/building_manager/smsMessages/getBalance");
+      setSmsBalance(response.data.data.balance);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
   useEffect(() => {
     getUnits();
+    getSmsBalance(); // ✅ فراخوانی موجودی SMS
   }, []);
 
   const onSubmit = async (formData) => {
+    // ✅ بررسی موجودی SMS اگر ارسال فعال باشد (هر پیامک = 7 واحد)
+    const smsCreditsRequired = 7;
+    
+    if (sendSMS && smsBalance < smsCreditsRequired) {
+      toast.error(`موجودی پیامک کافی نیست. مورد نیاز: ${smsCreditsRequired}، موجودی فعلی: ${smsBalance}`);
+      return;
+    }
+
     setLoading(true);
     try {
       const response = await axios.post(
@@ -71,12 +93,15 @@ export default ({ show, setShow, setLoading, refreshData }) => {
           description: formData.description,
           date: formData.date,
           resident_type: formData.resident_type,
+          send_sms: sendSMS, // ✅ ارسال پارامتر SMS
         }
       );
       toast.success(response.data.message);
       setShow(false);
       refreshData();
       reset();
+      setSendSMS(false); // ✅ ریست کردن checkbox
+      getSmsBalance(); // ✅ به‌روزرسانی موجودی SMS
     } catch (err) {
       if (err.response && err.response.data.message) {
         toast.error(err.response.data.message);
@@ -274,6 +299,53 @@ export default ({ show, setShow, setLoading, refreshData }) => {
                         </>
                       )}
                     />
+                  </div>
+                </Col>
+                {/* ✅ بخش جدید: Checkbox ارسال SMS */}
+                <Col md={12}>
+                  <div className="mt-2 p-3" style={{ 
+                    backgroundColor: "#f8f9fa", 
+                    borderRadius: "8px",
+                    border: "1px solid #e0e0e0"
+                  }}>
+                    <div className="form-check form-switch">
+                      <Input
+                        type="checkbox"
+                        className="form-check-input"
+                        id="sendSmsCheckbox"
+                        checked={sendSMS}
+                        onChange={(e) => setSendSMS(e.target.checked)}
+                        style={{ cursor: "pointer" }}
+                      />
+                      <Label 
+                        className="form-check-label" 
+                        htmlFor="sendSmsCheckbox"
+                        style={{ cursor: "pointer", fontWeight: "500" }}
+                      >
+                        📱 ارسال لینک پرداخت از طریق پیامک
+                      </Label>
+                    </div>
+                    <small className="text-muted d-block mt-1">
+                      {sendSMS ? (
+                        <span className="text-success">
+                          ✓ لینک پرداخت برای مخاطب ارسال خواهد شد و <strong>7 واحد پیامک</strong> از اعتبار شما کسر می‌گردد
+                        </span>
+                      ) : (
+                        <span>
+                          در صورت فعال‌سازی، لینک پرداخت به صورت خودکار برای مخاطب ارسال می‌شود (7 واحد اعتبار)
+                        </span>
+                      )}
+                    </small>
+                    <div className="mt-2">
+                      <small className="text-muted">
+                        موجودی فعلی پیامک: <strong className={smsBalance < 70 ? "text-danger" : "text-success"}>{smsBalance.toLocaleString()}</strong>
+                      </small>
+                      {smsBalance < 70 && (
+                        <small className="text-warning d-block mt-1">
+                          ⚠️ موجودی پیامک شما کم است (کمتر از 10 پیامک)
+                        </small>
+                      )}
+                    </div>
                   </div>
                 </Col>
               </Row>

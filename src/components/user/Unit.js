@@ -51,7 +51,6 @@ const Unit = ({ unit, refreshData }) => {
         <CardHeader>
           <h3 className="text-center w-100">شماره واحد : {unit.unit_number}</h3>
           <h5 className="text-center w-100">{unit.building.name}</h5>
-          <h6 className="text-center text-danger w-100"> تمامی مبالغ به ریال است </h6>
         </CardHeader>
         <CardBody>
           <h6 className="d-flex flex-row justify-content-between">
@@ -143,33 +142,6 @@ const Unit = ({ unit, refreshData }) => {
         </CardBody>
         <CardFooter>
           <Row>
-            {unit.canPayManual ? (
-              <>
-                <Col md="6">
-                  <Button
-                    color="primary"
-                    className="w-100 mb-1"
-                    onClick={() => {
-                      setManualPayModal(true);
-                    }}
-                  >
-                    ثبت پرداخت دستی
-                  </Button>
-                </Col>
-              </>
-            ) : <Col md="3"></Col>}
-            {/* <Col md="6">
-              <Button
-                color="success"
-                className="w-100 mb-1"
-                onClick={() => {
-                  setOnlinePayModal(true);
-                }}
-              >
-                پرداخت آنلاین بدهی
-              </Button>
-            </Col> */}
-
             {unit.separateResidentAndOwnerInvoices ? (<>
               <Col md="6">
                 {unit.resident_type == 'resident' && (
@@ -212,6 +184,21 @@ const Unit = ({ unit, refreshData }) => {
                 </Button>
               </Col>
             )}
+            {unit.canPayManual ? (
+              <>
+                <Col md="6">
+                  <Button
+                    color="primary"
+                    className="w-100 mb-1"
+                    onClick={() => {
+                      setManualPayModal(true);
+                    }}
+                  >
+                    ثبت پرداخت دستی
+                  </Button>
+                </Col>
+              </>
+            ) : <Col md="3"></Col>}
           </Row>
         </CardFooter>
       </Card>

@@ -26,7 +26,7 @@ let themeConfig = {
     footer: {
       type: "hidden", // static, sticky, hidden
     },
-    primaryColor: "#133D70",
+    primaryColor: "#384CA2",
     primaryColorRGB: "19, 61, 112",
     accentColor: "#FFC727",
     customizer: false,

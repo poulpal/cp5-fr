@@ -38,6 +38,8 @@ export default ({ units, setLoading, refreshData, toggleModal }) => {
   const [description, setDescription] = useState("");
   const [date, setDate] = useState(moment(new Date()).format("jYYYY/jMM/jDD"));
   const [residentType, setResidentType] = useState("resident");
+  const [sendSMS, setSendSMS] = useState(false); // ✅ State برای ارسال SMS
+  const [smsBalance, setSmsBalance] = useState(0); // ✅ موجودی SMS
 
   const {
     control,
@@ -48,7 +50,29 @@ export default ({ units, setLoading, refreshData, toggleModal }) => {
     setValue,
   } = useForm();
 
+  // ✅ دریافت موجودی SMS
+  useEffect(() => {
+    const getSmsBalance = async () => {
+      try {
+        const response = await axios.get("/building_manager/smsMessages/getBalance");
+        setSmsBalance(response.data.data.balance);
+      } catch (err) {
+        console.log(err);
+      }
+    };
+    getSmsBalance();
+  }, []);
+
   const onSubmit = async (data) => {
+    // ✅ بررسی موجودی SMS (تخمین 3 واحد برای هر پیامک)
+    const estimatedCreditsPerMessage = 3;
+    const requiredCredits = selectedUnits.length * estimatedCreditsPerMessage;
+    
+    if (sendSMS && smsBalance < requiredCredits) {
+      toast.error(`موجودی پیامک کافی نیست. تخمین مورد نیاز: ${requiredCredits} (${selectedUnits.length} واحد × ${estimatedCreditsPerMessage})، موجودی فعلی: ${smsBalance}`);
+      return;
+    }
+
     setLoading(true);
     let tempTolls = tolls;
     if (currency === "rial") {
@@ -65,6 +89,7 @@ export default ({ units, setLoading, refreshData, toggleModal }) => {
         {
           tolls: tempTolls,
           resident_type: residentType,
+          send_sms: sendSMS, // ✅ ارسال پارامتر SMS
         }
       );
       toast.success(response.data.message);
@@ -282,6 +307,52 @@ export default ({ units, setLoading, refreshData, toggleModal }) => {
           </div>
         </Col>
       </Row>
+      <hr />
+      {/* ✅ بخش جدید: Checkbox ارسال SMS */}
+      <div className="mb-3 p-3" style={{ 
+        backgroundColor: "#f8f9fa", 
+        borderRadius: "8px",
+        border: "1px solid #e0e0e0"
+      }}>
+        <div className="form-check form-switch">
+          <Input
+            type="checkbox"
+            className="form-check-input"
+            id="sendSmsCheckboxMultiple"
+            checked={sendSMS}
+            onChange={(e) => setSendSMS(e.target.checked)}
+            style={{ cursor: "pointer" }}
+          />
+          <Label 
+            className="form-check-label" 
+            htmlFor="sendSmsCheckboxMultiple"
+            style={{ cursor: "pointer", fontWeight: "500" }}
+          >
+            📱 ارسال لینک پرداخت از طریق پیامک برای همه واحدها
+          </Label>
+        </div>
+        <small className="text-muted d-block mt-1">
+          {sendSMS ? (
+            <span className="text-success">
+              ✓ لینک پرداخت برای <strong>{selectedUnits.length} واحد</strong> ارسال خواهد شد و تقریباً <strong>{selectedUnits.length * 3} واحد پیامک</strong> ({selectedUnits.length} × 3) از اعتبار شما کسر می‌گردد
+            </span>
+          ) : (
+            <span>
+              در صورت فعال‌سازی، لینک پرداخت به صورت خودکار برای همه واحدها ارسال می‌شود (معادل 2-3 واحد اعتبار به ازای هر پیامک)
+            </span>
+          )}
+        </small>
+        <div className="mt-2">
+          <small className="text-muted">
+            موجودی فعلی پیامک: <strong className={smsBalance < (selectedUnits.length * 3) ? "text-danger" : "text-success"}>{smsBalance.toLocaleString()}</strong>
+          </small>
+          {sendSMS && smsBalance < (selectedUnits.length * 3) && (
+            <small className="text-danger d-block mt-1">
+              ⚠️ موجودی پیامک شما برای ارسال به {selectedUnits.length} واحد کافی نیست (تخمین مورد نیاز: {selectedUnits.length * 3})
+            </small>
+          )}
+        </div>
+      </div>
       <hr />
       <div style={{
         maxHeight: '300px',

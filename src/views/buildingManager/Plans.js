@@ -6,7 +6,7 @@
 
 import React from "react";
 import axios from "axios";
-
+import RentAddonCard from "../../components/buildingManager/features/RentAddonCard";
 // ===== تنظیمات و ثابت‌ها =====
 // اگر فرانت و بک‌اند روی دامنه جدا هستند، VITE_API_BASE_URL را در زمان بیلد ست کن
 const API_BASE = import.meta.env.VITE_API_BASE_URL || "";
@@ -247,3 +247,4 @@ const tdPrimary = {
   textAlign: "right",
   background: "#fcfcfc",
 };
+<RentAddonCard onActivated={refreshPlans} />
