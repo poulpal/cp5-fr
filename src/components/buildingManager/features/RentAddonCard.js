@@ -4,14 +4,9 @@ import axios from "axios";
 import toast from "react-hot-toast";
 import moment from "moment-jalaali";
 
-const formatToman = (rial) => {
-  if (rial == null) return "-";
-  const t = Math.round(Number(rial) / 10);
-  return t.toLocaleString("fa-IR") + " تومان";
-};
-
 export default function RentAddonCard({ onActivated }) {
   const [loading, setLoading] = useState(false);
+
   const buildingOptions = useMemo(() => {
     try { return JSON.parse(localStorage.getItem("buildingOptions") || "{}"); }
     catch { return {}; }
@@ -26,9 +21,8 @@ export default function RentAddonCard({ onActivated }) {
   const handlePurchase = async () => {
     setLoading(true);
     try {
-      // ✅ خرید از مسیر پکیج‌ها/ماژول‌ها
       const payload = {
-        modules: ["rent"],                        // ماژول اجاره
+        modules: ["rent"],
         ...(hasDiscount && discountCode ? { discount_code: discountCode } : {})
       };
       const res = await axios.post("/building_manager/modules/buy", payload);
@@ -36,7 +30,7 @@ export default function RentAddonCard({ onActivated }) {
       if (res?.data?.success) {
         toast.success(res?.data?.message || "افزونه اجاره فعال شد");
 
-        // به‌روزرسانی فوری UI
+        // به‌روزرسانی سریع UI
         try {
           const opts = JSON.parse(localStorage.getItem("buildingOptions") || "{}");
           opts.has_rent = true;
@@ -45,7 +39,7 @@ export default function RentAddonCard({ onActivated }) {
 
         if (typeof onActivated === "function") onActivated();
 
-        // اگر درگاه نیاز به هدایت دارد
+        // اگر درگاه URL بازگشت می‌دهد
         const redirect = res?.data?.data?.redirectUrl || res?.data?.redirectUrl;
         if (redirect) {
           if (navigator.userAgent.indexOf("ChargePalApp") >= 0) window.open(redirect, "_blank");
@@ -76,7 +70,7 @@ export default function RentAddonCard({ onActivated }) {
         <Row className="align-items-center">
           <Col md="8" className="mb-2">
             <div className="text-muted">
-              ردیابی قراردادهای اجاره، دریافت اجاره ماهانه، ثبت افزایش سالانه و گزارش‌های ویژهٔ مستأجران.
+              ردیابی قراردادها، اخذ خودکار اجاره، رشد سالانه، گزارش‌های مستأجران.
             </div>
           </Col>
           <Col md="4" className="text-center">
